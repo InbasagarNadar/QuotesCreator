@@ -113,7 +113,8 @@
             android:text="Color"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:layout_margin="20dp"/>
+            android:layout_margin="20dp" />
+
         <Button
             android:id="@+id/alignButton"
             android:onClick="onAlignmentClick"
@@ -122,7 +123,8 @@
             android:text="Align"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/colorButton"
-            android:layout_margin="20dp"/>
+            android:layout_margin="20dp" />
+
         <Button
             android:id="@+id/fontButton"
             android:onClick="onFontClick"
@@ -131,7 +133,16 @@
             android:text="Font"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/alignButton"
-            android:layout_margin="20dp"/>
+            android:layout_margin="20dp" />
+
+        <SeekBar
+            android:id="@+id/kerningSeekBar"
+            android:layout_width="200dp"
+            android:max="100"
+            android:layout_height="wrap_content"
+            app:layout_constraintRight_toRightOf="@+id/colorButton"
+            app:layout_constraintBottom_toTopOf="@id/colorButton"
+            android:layout_marginBottom="10dp" />
 
         <ScrollView
             android:layout_width="wrap_content"
@@ -141,6 +152,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toTopOf="@id/colorButton">
+
             <EditText
                 android:id="@+id/editTextInput"
                 android:layout_width="wrap_content"
@@ -149,9 +161,10 @@
                 android:maxWidth="300dp"
                 android:background="@null"
                 android:gravity="center"
+
                 android:textColorHint="#fff"
                 android:hint="Type something..."
-                android:inputType="textMultiLine"
+                android:inputType="textMultiLine|textVisiblePassword"
                 android:textColor="#fff" />
         </ScrollView>
         <FrameLayout
@@ -165,6 +178,7 @@
                 android:layout_gravity="center"
                 android:layout_width="200dp"
                 android:progressBackgroundTint="#fff"
+                android:progress="25"
                 android:max="45"
                 android:layout_height="wrap_content"
                 android:rotation="270" />
