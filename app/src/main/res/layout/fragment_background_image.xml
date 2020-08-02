@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/create_background_fragment_height"
+    android:padding="5dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".CreateBackgroundActivity">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/backgroundFillText"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:text="Alignment"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/backgroundFillLinearLayout"
+        app:layout_constraintTop_toBottomOf="@id/backgroundFillText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/backgroundImageText"
+        app:layout_constraintTop_toBottomOf="@id/backgroundFillLinearLayout"
+        android:layout_width="match_parent"
+        android:text="Background Image"
+        android:layout_height="wrap_content" />
+
+    <HorizontalScrollView
+        app:layout_constraintTop_toBottomOf="@id/backgroundImageText"
+        android:layout_width="match_parent"
+
+
+        android:layout_height="55dp">
+
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:text="X"
+                android:fontFamily="@font/montserrat_light"
+                android:textSize="20dp"
+                android:textColor="#FF00"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Space
+                android:layout_width="2dp"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:onClick="onSelectImageFromGalleryClick"
+                android:background="@drawable/gallery"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Space
+                android:layout_width="2dp"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:onClick="onImageSelectedFromAppClick"
+
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Space
+                android:layout_width="2dp"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <Button
+                android:text="+"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

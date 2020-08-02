@@ -1,7 +1,6 @@
 package com.radangames.quotescreator;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,8 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -35,16 +32,17 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 
-import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.OnColorSelectedListener;
-import com.flask.colorpicker.builder.ColorPickerClickListener;
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
-
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+/*import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+*/
+
 @SuppressLint("ClickableViewAccessibility")
-public class MainActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity {
 
     public FrameLayout canvas;
     // public ImageView tool;
@@ -63,14 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
     static final int TEXT_SPACING = 25;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /*getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_editor);
         //tool = findViewById(R.id.tool);
-        canvas = findViewById(R.id.canvas);
+        canvas = findViewById(R.id.backgroundCanvas);
         mainmenu = findViewById(R.id.mainmenu);
         textEditorOverlay = findViewById(R.id.textEditor);
         editTextInput = findViewById(R.id.editTextInput);
@@ -116,7 +115,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
         canvas.setDrawingCacheEnabled(true);
-        canvas.setOnTouchListener(new CustomOnTouchListener());
+
+        canvas.setOnTouchListener(new OldCustomOnTouchListener());
         imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         statusBarHeight = getResources().getDimensionPixelSize(getResources().getIdentifier("status_bar_height", "dimen", "android"));
         /*tool.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             Bitmap b = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(b);
+
             canvas.draw(c);
             b.compress(Bitmap.CompressFormat.JPEG, 95, new FileOutputStream(Environment.getExternalStorageDirectory() + "/Download/file.jpg"));
         }
@@ -180,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
-            ImageView imageView = new ImageView(MainActivity.this);
+            ImageView imageView = new ImageView(EditorActivity.this);
             imageView.setImageURI(imageUri);
             final ViewContainer vc = new ViewContainer();
             // vc.minHeight = vc.minWidth = 100;
@@ -198,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             options.inJustDecodeBounds = true;
             try {
                 BitmapFactory.decodeStream(
-                        MainActivity.this.getContentResolver().openInputStream(imageUri),
+                        EditorActivity.this.getContentResolver().openInputStream(imageUri),
                         null,
                         options);
             }
@@ -232,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ShowColorPicker(View view) {
-        ColorPickerDialogBuilder
+      /*  ColorPickerDialogBuilder
                 .with(this)
                 .setTitle("Choose color")
                 .initialColor(editTextInput.getCurrentTextColor())
@@ -268,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
-                .build().show();
+                .build().show();*/
     }
 
     int[] alignments = {Gravity.CENTER, Gravity.LEFT, Gravity.RIGHT};
@@ -296,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onAddTextClick(View view) {
         final ViewContainer viewContainer = new ViewContainer();
-        TextView textView = new AppCompatTextView(MainActivity.this);
+        TextView textView = new AppCompatTextView(EditorActivity.this);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 32.5f);
         textView.setTextColor(Color.argb(255, 255, 255, 255));
@@ -384,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
         v.startAnimation(anim);
     }
 
-    class CustomOnTouchListener implements View.OnTouchListener {
+    class OldCustomOnTouchListener implements View.OnTouchListener {
 
         SparseArray<Vector2D> activePointers = new SparseArray<>();
         float startScale = 1;

@@ -1,6 +1,5 @@
 package com.radangames.quotescreator;
 
-import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -18,7 +17,7 @@ class Vector2D {
     }
 
     static Vector2D getPositionRelativeToParent(View parent, MotionEvent motionEvent) {
-        return new Vector2D((int) motionEvent.getRawX() - parent.getLeft(), (int) motionEvent.getRawY() - parent.getTop() - MainActivity.statusBarHeight);
+        return new Vector2D((int) motionEvent.getRawX() - parent.getLeft(), (int) motionEvent.getRawY() - parent.getTop() - EditorActivity.statusBarHeight);
     }
 
     Vector2D minus(Vector2D rhs) {

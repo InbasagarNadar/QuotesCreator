@@ -6,11 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ddd"
-    tools:context=".MainActivity">
+    tools:context=".EditorActivity">
 
 
     <FrameLayout
-        android:id="@+id/canvas"
+        android:id="@+id/backgroundCanvas"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
