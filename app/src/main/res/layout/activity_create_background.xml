@@ -21,14 +21,22 @@
                 android:id="@+id/adFrame"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/colorAccent"
-                app:layout_constraintBottom_toBottomOf="parent" />
 
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/adView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    ads:adSize="BANNER"
+                    ads:adUnitId="ca-app-pub-3940256099942544/6300978111"></com.google.android.gms.ads.AdView>
+            </FrameLayout>
             <FrameLayout
                 android:id="@+id/actionBar"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/faint_green"
+                android:background="@color/sandal"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <Button
@@ -40,14 +48,18 @@
                     android:textColor="@color/colorAccent"
                     android:textSize="35dp" />
 
-                <Button
-                    android:layout_width="wrap_content"
+                <ImageButton
+                    android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="right"
                     android:onClick="onSaveClick"
-                    android:text="Save" />
+                    android:scaleType="fitCenter"
+                    android:tint="#222"
+                    android:backgroundTint="#0000"
+                    android:src="@drawable/save_floppy" />
 
                 <TextView
+
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginStart="50dp"
@@ -66,15 +78,20 @@
                 android:layout_marginTop="50dp"
                 android:layout_marginBottom="50dp">
 
-                <Button
+                <ImageButton
                     style="?android:borderlessButtonStyle"
                     android:layout_width="50dp"
                     android:layout_height="35dp"
                     android:background="@color/colorAccent"
                     android:onClick="onShowForegroundEditorClick"
-                    android:text="T"
+                    android:tint="#000"
+
+                    android:scaleType="centerInside"
+                    android:padding="5dp"
+                    android:src="@drawable/text_vector"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:contentDescription="Foreground Editor" />
 
                 <FrameLayout
                     android:id="@+id/backgroundCanvas"
@@ -141,16 +158,20 @@
                 android:layout_marginBottom="50dp"
                 android:visibility="invisible">
 
-                <Button
+                <ImageButton
                     style="?android:borderlessButtonStyle"
                     android:layout_width="50dp"
                     android:layout_height="35dp"
                     android:background="@color/colorAccent"
                     android:elevation="10dp"
+                    android:scaleType="centerInside"
+                    android:padding="5dp"
                     android:onClick="onShowBackgroundEditorClick"
-                    android:text="B"
+                    android:tint="#000"
+                    android:src="@drawable/gallery_vector"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:contentDescription="Background Editor" />
 
                 <FrameLayout
                     android:id="@+id/foregroundCanvas"
@@ -219,6 +240,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_toEndOf="@+id/button_add_text"
+                        android:onClick="onShowStickerSheetClick"
                         android:background="#ddd"
                         android:text="Sticker" />
 
@@ -247,10 +269,11 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:visibility="gone"
             android:id="@+id/textEditor"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="50dp"
-            android:background="#c000"
+            android:background="#7000"
             android:clickable="true">
 
             <Button
@@ -399,7 +422,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintRight_toRightOf="parent">
 
-                    <com.radangames.quotescreator.views.CustomColorPickerView
+                    <com.dartt.yello.views.CustomColorPickerView
                         android:id="@+id/font_color_picker"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -425,7 +448,7 @@
                         android:layout_columnWeight="1"
                         android:layout_marginEnd="5dp"
                         android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/faint_green">
+                        android:backgroundTint="@color/sandal">
 
                         <ImageView
                             android:id="@+id/_font_size_icon"
@@ -458,7 +481,7 @@
                         android:layout_columnWeight="1"
                         android:layout_marginStart="5dp"
                         android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/faint_green">
+                        android:backgroundTint="@color/sandal">
 
                         <Spinner
                             android:id="@+id/fontSpinner"
@@ -476,7 +499,7 @@
                         android:layout_marginTop="5dp"
                         android:layout_marginEnd="5dp"
                         android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/faint_green">
+                        android:backgroundTint="@color/sandal">
 
                         <ImageView
 
@@ -510,7 +533,7 @@
                         android:layout_marginStart="5dp"
                         android:layout_marginTop="5dp"
                         android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/faint_green">
+                        android:backgroundTint="@color/sandal">
 
                         <ImageView
                             android:id="@+id/_line_spacing_icon"

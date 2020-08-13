@@ -10,6 +10,6 @@
         android:textSize="50dp"
         android:fontFamily="@font/grandhotel_regular"
         android:gravity="center"
-        android:background="@color/faint_green"
+        android:background="@color/sandal"
         android:textColor="@color/colorAccent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,119 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/create_background_fragment_height"
-    android:padding="5dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
     tools:context=".CreateBackgroundActivity">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/backgroundFillText"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_width="match_parent"
-        android:text="Alignment"
-        android:layout_height="wrap_content" />
-
-    <LinearLayout
-        android:id="@+id/backgroundFillLinearLayout"
-        app:layout_constraintTop_toBottomOf="@id/backgroundFillText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-    </LinearLayout>
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/backgroundImageText"
-        app:layout_constraintTop_toBottomOf="@id/backgroundFillLinearLayout"
-        android:layout_width="match_parent"
-        android:text="Background Image"
-        android:layout_height="wrap_content" />
 
     <HorizontalScrollView
-        app:layout_constraintTop_toBottomOf="@id/backgroundImageText"
         android:layout_width="match_parent"
+        android:layout_height="60dp"
 
-
-        android:layout_height="55dp">
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
-
+            android:id="@+id/background_image_linear_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
+            android:padding="5dp"
+            android:clipToPadding="false"
+            android:animateLayoutChanges="true"
             android:orientation="horizontal">
 
-            <Button
-                android:text="X"
-                android:fontFamily="@font/montserrat_light"
-                android:textSize="20dp"
-                android:textColor="#FF00"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+            <ImageButton
+                android:id="@+id/remove_background_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/trash_can_vector"
+                android:scaleType="centerInside"
+                android:padding="5dp"
+                android:tint="#d00"
+                android:background="@drawable/shape_rounded_corner"
+                android:layout_marginEnd="5dp"
+                android:elevation="4dp"
+                android:onClick="onRemoveBackgroundClick"
+                android:visibility="gone" />
 
-            <Space
-                android:layout_width="2dp"
-                android:layout_height="match_parent" />
+            <ImageButton
+                android:layout_width="40dp"
+                android:layout_height="40dp"
 
-            <Button
+                android:adjustViewBounds="true"
+                android:background="@drawable/shape_rounded_corner"
+                android:elevation="4dp"
                 android:onClick="onSelectImageFromGalleryClick"
-                android:background="@drawable/gallery"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:padding="5dp"
+                android:scaleType="fitCenter"
+                android:tint="#000"
+                android:src="@drawable/gallery_vector" />
 
-            <Space
-                android:layout_width="2dp"
-                android:layout_height="match_parent" />
 
-            <Button
-                android:onClick="onImageSelectedFromAppClick"
-
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Space
-                android:layout_width="2dp"
-                android:layout_height="match_parent" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
-
-            <Button
-                android:text="+"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
         </LinearLayout>
 
     </HorizontalScrollView>

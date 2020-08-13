@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:padding="8dp"
+    android:clipToPadding="false"
+    android:layout_height="50dp">
+
+    <ImageView
+        android:id="@+id/spinner_image"
+        android:background="@drawable/shape_rounded_corner"
+        android:elevation="5dp"
+        android:outlineProvider="background"
+
+        android:src="@drawable/icon_yello"
+        android:layout_alignParentStart="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp" />
+
+    <TextView
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/spinner_text"
+        android:layout_width="wrap_content"
+
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:layout_toEndOf="@id/spinner_image" />
+
+</RelativeLayout>

@@ -7,12 +7,13 @@
         <item name="android:layoutDirection">ltr</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <style name="BottomSheetDialogTheme" parent="Theme.MaterialComponents.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
     </style>
 
     <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/shape_top_rounded</item>
+        <item name="android:backgroundTint">#cfff</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
