@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SaveActivity">
+    tools:context="com.dartt.yello.SaveActivity">
 
     <Button
         android:layout_width="wrap_content"
@@ -12,9 +12,9 @@
         android:layout_marginLeft="20dp"
         android:onClick="onSaveClick"
         android:text="save"
-        app:layout_constraintBottom_toBottomOf="parent"
+
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/filter_list" />
+        app:layout_constraintTop_toBottomOf="@id/image_view" />
 
     <Button
         android:layout_width="wrap_content"
@@ -22,77 +22,115 @@
         android:layout_marginEnd="20dp"
         android:onClick="onShareClick"
         android:text="share"
-        app:layout_constraintBottom_toBottomOf="parent"
+
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/filter_list" />
+        app:layout_constraintTop_toBottomOf="@id/image_view" />
 
-    <HorizontalScrollView
-        android:id="@+id/filter_list"
+    <FrameLayout
+        android:id="@+id/actionBar"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_margin="5dp"
-        android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/image_view">
+        android:layout_height="50dp"
+        android:background="@color/sandal"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="#0000"
+            android:text="≡"
+
+            android:textColor="@color/colorAccent"
+            android:textSize="35dp" />
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="right"
+            android:backgroundTint="#0000"
+            android:onClick="onSaveClick"
+            android:scaleType="fitCenter"
+            android:src="@drawable/save_floppy"
+            android:tint="#222" />
+
+        <TextView
+
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F1"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F2"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F3"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F4"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F5"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F6"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F7"
-                android:textSize="15dp" />
-
-            <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:text="F8"
-                android:textSize="15dp" />
-        </LinearLayout>
-    </HorizontalScrollView>
+            android:layout_height="match_parent"
+            android:layout_marginStart="50dp"
+            android:fontFamily="@font/grandhotel_regular"
+            android:gravity="center"
+            android:text="Yello"
+            android:textColor="@color/colorAccent"
+            android:textSize="35dp" />
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/image_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/actionBar" />
+
+    <ImageView
+        android:id="@+id/filter_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:alpha="0"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toBottomOf="@id/actionBar" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:layout_margin="5dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/filter_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:visibility="gone"
+            android:clickable="true"
+            android:background="#fff"
+            android:id="@+id/filter_strength_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <SeekBar
+                android:id="@+id/seek_bar_filter_strength"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                app:layout_constraintBottom_toTopOf="@id/_filter_strength_buttons"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <GridLayout
+                android:id="@+id/_filter_strength_buttons"
+                android:layout_height="30dp"
+                android:layout_width="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:text="Cancel"
+                    android:background="#0000"
+                    android:onClick="onCancelFilterStrengthClick"
+                    android:layout_height="match_parent"
+                    android:layout_columnWeight="1" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="Confirm"
+                    android:onClick="onConfirmFilterStrengthClick"
+                    android:background="#0000"
+                    android:layout_columnWeight="1" />
+            </GridLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

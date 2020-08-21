@@ -79,14 +79,22 @@ public class Variables {
             R.font.bungee_regular,
             R.font.grandhotel_regular,
             R.font.merianda_bold,
-            R.font.hindi_rozha_one
+            R.font.hindi_rozha_one,
+            R.font.hindi_rozha_one,
+            R.font.hindi_rozha_one,
+            R.font.hindi_rozha_one,
+            R.font.hindi_rozha_one,
     };
     public static String[] fontResourceName = {
             "Montserrat Light",
             "Bungee Regular",
             "GrandHotel Regular",
             "Merianda Bold",
-            "Rozha One"
+            "Rozha One",
+            "Rozha One",
+            "Rozha One",
+            "Rozha One",
+            "Rozha One",
     };
 
     public static int[] stickerResourceId = {

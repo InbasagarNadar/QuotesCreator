@@ -28,7 +28,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -38,9 +37,9 @@ import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -50,6 +49,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
@@ -67,7 +67,6 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.jaredrummler.android.colorpicker.ColorPickerView;
@@ -75,6 +74,7 @@ import com.jaredrummler.android.colorpicker.ColorPickerView;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 
 @SuppressLint("ClickableViewAccessibility")
@@ -86,7 +86,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     Foreground Foreground;
     Background Background;
     TextEditor TextEditor;
-
+    StickerEditor StickerEditor;
     FrameLayout canvasFrameLayout;
 
     TabLayout tabLayout;
@@ -103,6 +103,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         Foreground = new Foreground();
         Background = new Background();
         TextEditor = new TextEditor();
+        StickerEditor = new StickerEditor();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.drawer);
@@ -136,8 +137,8 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(viewPagerAdapter);
+        viewPager.setOffscreenPageLimit(3);
         tabLayout.setupWithViewPager(viewPager);
-        //viewPager.getFr
 
         GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.TR_BL, Variables.Gradients[1]);
         canvasFrameLayout.setBackground(gd);
@@ -154,7 +155,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     }
 
     public void onHamClick(View view) {
-        drawerLayout.openDrawer(Gravity.LEFT);
+        drawerLayout.openDrawer(GravityCompat.START);
     }
 
     public void onShowGradientPicker(View view) {
@@ -175,10 +176,30 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         dialogFragment.show(ft, "dialog");
     }
 
+    public void onShowColorPicker(View view) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        ColorDialogFragment dialogFragment = ColorDialogFragment.newInstance(Variables.currentColor, new ColorDialogFragment.Listener() {
+            @Override
+            public void onColorSelected(int color) {
+                Background.setFillColor(color);
+            }
+        });
+        dialogFragment.show(ft, "dialog");
+    }
+
     @Override
     public void onBackPressed() {
         if (!TextEditor.isKeyboardVisible() && TextEditor.isVisible()) {
             TextEditor.commit();
+            return;
+        }
+        if (StickerEditor.isVisible()) {
+            StickerEditor.commitSticker();
             return;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -316,13 +337,19 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         return ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getResources().getResourcePackageName(resId) + '/' + getResources().getResourceTypeName(resId) + '/' + getResources().getResourceEntryName(resId);
     }
 
-    int SELECT_BACKGROUND_IMAGE_REQUEST_CODE = 0;
+    final int SELECT_BACKGROUND_IMAGE_REQUEST_CODE = 0;
+    final int INTERNET_IMAGE_REQUEST_CODE = 1;
 
     public void onSelectImageFromGalleryClick(View view) {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_BACKGROUND_IMAGE_REQUEST_CODE);
+    }
+
+    public void onSelectImageFromInternetClick(View view) {
+        Intent intent = new Intent(this, ServerImagesActivity.class);
+        startActivityForResult(intent, INTERNET_IMAGE_REQUEST_CODE);
     }
 
     @Override
@@ -332,12 +359,16 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             if (requestCode == SELECT_BACKGROUND_IMAGE_REQUEST_CODE) {
                 Background.setImageCentered(resultIntent.getData());
             }
+            if (requestCode == INTERNET_IMAGE_REQUEST_CODE) {
+                Background.loadImageFromInternet(resultIntent.getExtras().getString("image_url"));
+            }
         }
     }
 
     public void onRemoveBackgroundClick(View view) {
         Background.removeBackground();
     }
+
 
     class CanvasTouchListener extends CustomOnTouchListener {
 
@@ -408,13 +439,25 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         dialogFragment.listener = new StickerBottomSheet.Listener() {
             @Override
             public void onStickerSelectListener(int index) {
-                //Toast.makeText(CreateBackgroundActivity.this, ""+resourceId, Toast.LENGTH_SHORT).show();
-                new StickerViewContainer(Variables.stickerResourceId[index], Foreground.canvas);
+                Glide.with(CreateBackgroundActivity.this).load(Variables.stickerResourceId[index]).into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        StickerViewContainer stickerViewContainer = new StickerViewContainer(resource);
+                        Foreground.add(stickerViewContainer);
+                        stickerViewContainer.alignToCenter();
+                        stickerViewContainer.resetScale();
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
             }
         };
         dialogFragment.show(ft, "sticker");
     }
-
+/*
     public void onPickBackgroundColorClick(View view) {
         BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -441,41 +484,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         dialog.setContentView(bottomSheetView);
         dialog.show();
     }
-
-    /*
-    public void onPickBackgroundColorClick(View view) {
-        BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_color, (ViewGroup) findViewById(R.id.bottom_sheet_container));
-        final ColorPickerView colorPickerView = bottomSheetView.findViewById(R.id.color_picker);
-        colorPickerView.setOnColorChangedListener(
-                new ColorPickerView.OnColorChangedListener() {
-                    @Override
-                    public void onColorChanged(int newColor) {
-                        Background.setFillColor(newColor);
-
-                    }
-                }
-        );*/
-
-       /* dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-
-            }
-        });*/
-      /*  colorPickerView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                v.getParent().requestDisallowInterceptTouchEvent(true);
-                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-                    v.getParent().requestDisallowInterceptTouchEvent(false);
-                }
-                return false;
-            }
-        });
-        dialog.setContentView(bottomSheetView);
-        dialog.show();
-    }*/
+*/
 
     class Background {
         public View parent;
@@ -547,7 +556,18 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         }
 
         void setImageCentered(Uri imageUri) {
-            findViewById(R.id.remove_background_button).setVisibility(View.VISIBLE);
+            Glide.with(CreateBackgroundActivity.this).load(imageUri).into(new CustomTarget<Drawable>() {
+                @Override
+                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                    setBackgroundDrawable(resource);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                }
+            });
+            /*findViewById(R.id.remove_background_button).setVisibility(View.VISIBLE);
             Foreground.backgroundImage.setImageURI(imageUri);
             backgroundImage.setImageURI(imageUri);
             int[] imageDimension = getImageRatio(imageUri);
@@ -562,7 +582,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 params.width = canvasDimension[0];
                 params.height = canvasDimension[1];
             }
-            else if (imageRatio > canvasRatio) {
+            else if (imageRatio < canvasRatio) {
                 params.width = canvasDimension[0];
                 params.height = (int) ((canvasDimension[0] / imageRatio));
                 params.topMargin = (canvasDimension[1] - params.height) / 2;
@@ -573,11 +593,25 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 params.leftMargin = (canvasDimension[0] - params.width) / 2;
             }
             backgroundImage.setRotation(0);
-            backgroundImage.setLayoutParams(params);
+            backgroundImage.setLayoutParams(params);*/
         }
 
         public void loadImageFromResource(int resourceId) {
             Glide.with(CreateBackgroundActivity.this).load(resourceId).into(new CustomTarget<Drawable>() {
+                @Override
+                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                    setBackgroundDrawable(resource);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                }
+            });
+        }
+
+        public void loadImageFromInternet(String image_url) {
+            Glide.with(CreateBackgroundActivity.this).load(image_url).into(new CustomTarget<Drawable>() {
                 @Override
                 public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                     setBackgroundDrawable(resource);
@@ -606,7 +640,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 params.width = canvasDimension[0];
                 params.height = canvasDimension[1];
             }
-            else if (imageRatio > canvasRatio) {
+            else if (imageRatio < canvasRatio) {
                 params.width = canvasDimension[0];
                 params.height = (int) ((canvasDimension[0] / imageRatio));
                 params.topMargin = (canvasDimension[1] - params.height) / 2;
@@ -640,7 +674,6 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             }
 
         }
-
     }
 
     public void onShowColorListClick(View view) {
@@ -654,11 +687,98 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     }
 
 
+    private class StickerEditor {
+        ConstraintLayout parent = findViewById(R.id.sticker_editor);
+        SeekBar opacitySeekBar = findViewById(R.id.sticker_opacity_seekBar);
+        ImageView stickerImageView = findViewById(R.id.sticker_image_view);
+
+        StickerViewContainer activeViewContainer;
+
+        StickerEditor() {
+            opacitySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    setOpacity((float) i / (float) seekBar.getMax());
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+            findViewById(R.id.button_sticker_cancel).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    hide();
+                }
+            });
+            findViewById(R.id.button_sticker_delete).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    deleteSticker();
+                }
+            });
+            findViewById(R.id.button_sticker_commit).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    commitSticker();
+                }
+            });
+        }
+
+        void edit(StickerViewContainer viewContainer) {
+            activeViewContainer = viewContainer;
+            stickerImageView.setImageDrawable(viewContainer.getView().getDrawable());
+            setOpacity(viewContainer.getAlpha());
+            opacitySeekBar.setProgress((int) (viewContainer.getAlpha() * opacitySeekBar.getMax()));
+            show();
+        }
+
+        void setOpacity(float opacity) {
+            stickerImageView.setAlpha(opacity);
+        }
+
+        void show() {
+            parent.setVisibility(View.VISIBLE);
+        }
+
+        void hide() {
+            activeViewContainer = null;
+            parent.setVisibility(View.GONE);
+        }
+
+        void deleteSticker() {
+            Foreground.remove(activeViewContainer);
+            hide();
+        }
+
+        void commitSticker() {
+            activeViewContainer.setAlpha(stickerImageView.getAlpha());
+            hide();
+        }
+
+        boolean isVisible() {
+            return parent.getVisibility() == View.VISIBLE;
+        }
+    }
+
+
     /*
      * TEXT EDITOR RELATED CODE
      */
     public void onAddTextClick(View view) {
-        TextEditor.edit(new TextViewContainer(this, Foreground.canvas));
+        TextEditor.edit(new TextViewContainer(this));
+    }
+
+    public void onDeleteTextClick(View view) {
+        TextEditor.deleteText();
+    }
+
+    public void onCancelTextClick(View view) {
+        TextEditor.rollback();
     }
 
     public void onCommitTextClick(View view) {
@@ -685,6 +805,10 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         TextEditor.toggleFontOptionGrid();
     }
 
+    public void onShowTypefacePanel(View view) {
+        TextEditor.showTypefacePanel();
+    }
+
     public void onToggleFontColorPicker(View view) {
         TextEditor.toggleFontOptionColorPanel();
     }
@@ -699,7 +823,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         SeekBar fontSizeSeekBar = findViewById(R.id.seekBarFontSize);
         SeekBar letterSpacingSeekBar = findViewById(R.id.seekbar_letter_spacing);
         SeekBar lineSpacingSeekBar = findViewById(R.id.seekbar_line_spacing);
-        Spinner fontSpinner = findViewById(R.id.fontSpinner);
+        //Spinner fontSpinner = findViewById(R.id.fontSpinner);
         GridLayout fontOptionGrid = findViewById(R.id.font_options_grid);
         CustomColorPickerView fontColorPicker = findViewById(R.id.font_color_picker);
         ViewGroup fontColorPickerParent = findViewById(R.id.font_color_picker_parent);
@@ -776,13 +900,12 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             }
         };
 
-        /* ColorPickerSheet fontColorPicker = new ColorPickerSheet() {
-             @Override
-             void onChangeColor(int newColor) {
-                 editText.setTextColor(newColor);
-             }
-         };
- */
+        int oldFontIndex = 0;
+        int fontIndex = 0;
+        TextView fontPreviewText = findViewById(R.id.font_preview_text);
+        ConstraintLayout typefacePanel = findViewById(R.id.font_typeface_panel);
+        ListView fontListView = findViewById(R.id.font_list_view);
+
         ImageButton textAlignmentImageButton = findViewById(R.id.button_text_align);
         final Drawable[] alignmentDrawables = new Drawable[]{
                 ResourcesCompat.getDrawable(getResources(), R.drawable.align_left, null),
@@ -838,19 +961,6 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 }
             });
 
-            fontSpinner.setAdapter(new FontSpinnerAdapter(CreateBackgroundActivity.this));
-            fontSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    editText.setTypeface(ResourcesCompat.getFont(CreateBackgroundActivity.this, Variables.fontResourceId[i]));
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-
-                }
-            });
             fontColorPicker.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
                 @Override
                 public void onColorChanged(int newColor) {
@@ -866,10 +976,46 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             editText.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
+                    typefacePanel.setVisibility(View.GONE);
                     editText.setShowSoftInputOnFocus(fontColorPickerParent.getVisibility() != View.VISIBLE);
                     return view.onTouchEvent(motionEvent);
                 }
             });
+            editText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    fontColorPickerParent.setVisibility(View.GONE);
+                    show();
+                }
+            });
+            fontListView.setAdapter(new TypefaceListViewAdapter(CreateBackgroundActivity.this));
+            fontListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    setEditorTypeface(i);
+                }
+            });
+            findViewById(R.id.font_typeface_cancel).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setEditorTypeface(oldFontIndex);
+                    show();
+                }
+            });
+            findViewById(R.id.font_typeface_confirm).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    oldFontIndex = fontIndex;
+                    show();
+                }
+            });
+        }
+
+        void setEditorTypeface(int index) {
+            Typeface tf = ResourcesCompat.getFont(CreateBackgroundActivity.this, Variables.fontResourceId[index]);
+            editText.setTypeface(tf);
+            fontPreviewText.setTypeface(tf);
+            fontIndex = index;
         }
 
         public boolean isKeyboardVisible() {
@@ -878,9 +1024,11 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         }
 
         public void show() {
+            hideTypefacePanel();
             parent.setVisibility(View.VISIBLE);
             editText.requestFocus();
             inputManager.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+
         }
 
         public void hide() {
@@ -888,6 +1036,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
             editText.clearFocus();
             fontColorPickerParent.setVisibility(View.GONE);
+            hideTypefacePanel();
         }
 
         public void edit(TextViewContainer textViewContainer) {
@@ -896,7 +1045,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             copyTextStyle(text, editText);
             editText.setText(activeTextViewContainer.textContentOriginal);
             setEditorAlignment(text.getGravity());
-            fontSpinner.setSelection(textViewContainer.fontIndex);
+            fontIndex = textViewContainer.fontIndex;
             fontSizeSeekBar.setProgress((int) Variables.pixelToDensity(CreateBackgroundActivity.this, (int) textViewContainer.textSizePx) - fontSizeSeekBarMin);
             letterSpacingSeekBar.setProgress((int) text.getLetterSpacing() * 50);
             lineSpacingSeekBar.setProgress((int) ((text.getLineSpacingMultiplier() - 1) * 50));
@@ -907,13 +1056,29 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             if (activeTextViewContainer != null) {
                 String text = editText.getText().toString().trim();
                 if (text.equals("")) {
-                    activeTextViewContainer.remove();
+                    Foreground.remove(activeTextViewContainer);
                 }
                 else {
+                    if (!Foreground.hasView(activeTextViewContainer)) {
+                        Foreground.add(activeTextViewContainer);
+                        activeTextViewContainer.alignToCenter();
+                    }
                     activeTextViewContainer.updateContent(editText);
-                    activeTextViewContainer.fontIndex = fontSpinner.getSelectedItemPosition();
+                    activeTextViewContainer.fontIndex = fontIndex;
                 }
             }
+            activeTextViewContainer = null;
+            hide();
+        }
+
+        public void deleteText() {
+            Foreground.remove(activeTextViewContainer);
+            activeTextViewContainer = null;
+            hide();
+        }
+
+        public void rollback() {
+            activeTextViewContainer = null;
             hide();
         }
 
@@ -1050,6 +1215,16 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             return parent.getVisibility() == View.VISIBLE;
         }
 
+        public void showTypefacePanel() {
+            inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+            editText.clearFocus();
+            typefacePanel.setVisibility(View.VISIBLE);
+        }
+
+        public void hideTypefacePanel() {
+            typefacePanel.setVisibility(View.GONE);
+        }
+
         abstract class SpanHelper {
             abstract boolean match(ParcelableSpan span);
 
@@ -1062,36 +1237,35 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     class StickerViewContainer extends ViewContainer {
         final int defaultWidth = Variables.densityToPixel(CreateBackgroundActivity.this, 200);
 
-        StickerViewContainer(final int resourceId, ViewGroup parent) {
-            view = new ImageView(CreateBackgroundActivity.this);
-            parent.addView(view);
-            view.setOnTouchListener(new ViewOnTouchListener() {
+        StickerViewContainer(Drawable drawable) {
+            ImageView imageView = new ImageView(CreateBackgroundActivity.this);
+            imageView.setImageDrawable(drawable);
+            imageView.setOnTouchListener(new ViewOnTouchListener() {
                 @Override
                 ViewContainer getViewContainer() {
                     return StickerViewContainer.this;
                 }
             });
-            Glide.with(CreateBackgroundActivity.this).load(resourceId).into(new CustomTarget<Drawable>() {
-                @Override
-                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                    ImageView imageView = (ImageView) view;
-                    imageView.setImageDrawable(resource);
-                    Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-                    float imageRatio = bitmap.getWidth() / (float) bitmap.getHeight();
-                    setDimension(new Vector2D(defaultWidth, defaultWidth / imageRatio));
-                    view.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            alignToCenter();
-                        }
-                    });
-                }
+            view = imageView;
+        }
 
-                @Override
-                public void onLoadCleared(@Nullable Drawable placeholder) {
+        void resetScale() {
+            Bitmap bitmap = ((BitmapDrawable) ((ImageView) view).getDrawable()).getBitmap();
+            float imageRatio = bitmap.getWidth() / (float) bitmap.getHeight();
+            setDimension(new Vector2D(defaultWidth, defaultWidth / imageRatio));
+            scale = 1;
+        }
 
-                }
-            });
+        ImageView getView() {
+            return (ImageView) view;
+        }
+
+        float getAlpha() {
+            return getView().getAlpha();
+        }
+
+        void setAlpha(float opacity) {
+            getView().setAlpha(opacity);
         }
     }
 
@@ -1102,7 +1276,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         float textSizePx = Variables.densityToPixel(CreateBackgroundActivity.this, 35);
         int fontIndex = 0;
 
-        TextViewContainer(final CreateBackgroundActivity activity, ViewGroup parent) {
+        TextViewContainer(final CreateBackgroundActivity activity) {
             TextView textView = new AppCompatTextView(activity);
             textView.setGravity(Gravity.CENTER);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 32.5f);
@@ -1115,8 +1289,8 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 }
             });
             view = textView;
-            parent.addView(view);
-            alignToCenter();
+            //Foreground.canvas.addView(textView);
+            //alignToCenter();
         }
 
         public TextView getView() {
@@ -1167,7 +1341,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         public float height;
         public SpannableStringBuilder text;
 
-        public void remove() {
+        public void detachFromParent() {
             ((ViewGroup) view.getParent()).removeView(view);
         }
 
@@ -1226,10 +1400,13 @@ public class CreateBackgroundActivity extends AppCompatActivity {
      * FOREGROUND EDITOR RELATED CODES
      */
     private class Foreground {
-        public View parent;
+        public ViewGroup parent;
         public FrameLayout canvas;
         public ImageView backgroundImage;
         public ForegroundCanvasTouchListener touchListener;
+
+        ArrayList<ViewContainer> objects;
+
 
         Foreground() {
             parent = findViewById(R.id.foregroundEditorParent);
@@ -1237,6 +1414,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             backgroundImage = findViewById(R.id.fg_backgroundImageView);
             touchListener = new ForegroundCanvasTouchListener(canvas);
             canvas.setOnTouchListener(touchListener);
+            objects = new ArrayList<>();
         }
 
         void show() {
@@ -1253,6 +1431,20 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             parent.setVisibility(View.INVISIBLE);
         }
 
+        boolean hasView(ViewContainer viewContainer) {
+            return objects.contains(viewContainer);
+        }
+
+        void add(ViewContainer viewContainer) {
+            objects.add(viewContainer);
+            canvas.addView(viewContainer.view);
+
+        }
+
+        void remove(ViewContainer viewContainer) {
+            objects.remove(viewContainer);
+            canvas.removeView(viewContainer.view);
+        }
 
         private class ForegroundCanvasTouchListener extends CustomOnTouchListener {
             public float viewInitialScale;
@@ -1273,6 +1465,9 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 if (activeViewContainer != null) {
                     if (activeViewContainer instanceof TextViewContainer) {
                         TextEditor.edit((TextViewContainer) activeViewContainer);
+                    }
+                    else if (activeViewContainer instanceof StickerViewContainer) {
+                        StickerEditor.edit((StickerViewContainer) activeViewContainer);
                     }
                 }
             }
@@ -1385,65 +1580,65 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                 }
         );
     }
-/*
-    abstract class ColorPickerSheet {
-        BottomSheetDialog dialog;
-        ColorPickerView colorPickerView;
 
-        ColorPickerSheet() {
-            dialog = new BottomSheetDialog(CreateBackgroundActivity.this, R.style.BottomSheetDialogTheme);
-            dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            View bottomSheetView = LayoutInflater.from(CreateBackgroundActivity.this).inflate(R.layout.bottom_sheet_color, (ViewGroup) findViewById(R.id.bottom_sheet_container));
-            colorPickerView = bottomSheetView.findViewById(R.id.color_picker);
-            colorPickerView.setOnColorChangedListener(
-                    new ColorPickerView.OnColorChangedListener() {
-                        @Override
-                        public void onColorChanged(int newColor) {
-                            onChangeColor(newColor);
+    /*
+        abstract class ColorPickerSheet {
+            BottomSheetDialog dialog;
+            ColorPickerView colorPickerView;
+
+            ColorPickerSheet() {
+                dialog = new BottomSheetDialog(CreateBackgroundActivity.this, R.style.BottomSheetDialogTheme);
+                dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                View bottomSheetView = LayoutInflater.from(CreateBackgroundActivity.this).inflate(R.layout.bottom_sheet_color, (ViewGroup) findViewById(R.id.bottom_sheet_container));
+                colorPickerView = bottomSheetView.findViewById(R.id.color_picker);
+                colorPickerView.setOnColorChangedListener(
+                        new ColorPickerView.OnColorChangedListener() {
+                            @Override
+                            public void onColorChanged(int newColor) {
+                                onChangeColor(newColor);
+                            }
                         }
+                );
+                //To prevent accidental swipe down;
+                colorPickerView.setOnTouchListener(new View.OnTouchListener() {
+                    public boolean onTouch(View v, MotionEvent event) {
+                        v.getParent().requestDisallowInterceptTouchEvent(true);
+                        if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+                            v.getParent().requestDisallowInterceptTouchEvent(false);
+                        }
+                        return false;
                     }
-            );
-            //To prevent accidental swipe down;
-            colorPickerView.setOnTouchListener(new View.OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    v.getParent().requestDisallowInterceptTouchEvent(true);
-                    if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-                        v.getParent().requestDisallowInterceptTouchEvent(false);
-                    }
-                    return false;
-                }
-            });
-            dialog.setContentView(bottomSheetView);
+                });
+                dialog.setContentView(bottomSheetView);
+            }
+
+            void show() {
+                dialog.show();
+            }
+
+            void setAlphaSlider(boolean visible) {
+                colorPickerView.setAlphaSliderVisible(visible);
+            }
+
+            void setColor(int color) {
+                colorPickerView.setColor(color);
+            }
+
+            abstract void onChangeColor(int newColor);
         }
-
-        void show() {
-            dialog.show();
-        }
-
-        void setAlphaSlider(boolean visible) {
-            colorPickerView.setAlphaSliderVisible(visible);
-        }
-
-        void setColor(int color) {
-            colorPickerView.setColor(color);
-        }
-
-        abstract void onChangeColor(int newColor);
-    }
-*/
-
+    */
     class ViewPagerAdapter extends FragmentPagerAdapter {
 
         public ViewPagerAdapter(FragmentManager fm) {
             super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
 
+        @NonNull
         @Override
         public Fragment getItem(int position) {
             Fragment fragment;
             if (position == 0) {
-                fragment = Background.backgroundImageFragment;//new BackgroundImageFragment();
-
+                fragment = Background.backgroundImageFragment;
             }
             else if (position == 1) {
                 fragment = Background.backgroundFillFragment;
@@ -1476,26 +1671,21 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     }
 }
 
-class FontSpinnerAdapter extends ArrayAdapter<String> {
+class TypefaceListViewAdapter extends ArrayAdapter<String> {
 
-    public FontSpinnerAdapter(@NonNull Context context) {
-        super(context, R.layout.support_simple_spinner_dropdown_item, Variables.fontResourceName);
+    public TypefaceListViewAdapter(@NonNull Context context) {
+        super(context, 0, Variables.fontResourceName);
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        TextView view = (TextView) super.getView(position, convertView, parent);
+        if (convertView == null) {
+            convertView = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.font_list_row, parent, false);
+        }
+        TextView view = (TextView) convertView;
         view.setTypeface(ResourcesCompat.getFont(getContext(), Variables.fontResourceId[position]));
-        view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
-        return view;
-    }
-
-    @Override
-    public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        TextView view = (TextView) super.getView(position, convertView, parent);
-        view.setTypeface(ResourcesCompat.getFont(getContext(), Variables.fontResourceId[position]));
-        view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+        view.setText(Variables.fontResourceName[position]);
         return view;
     }
 }

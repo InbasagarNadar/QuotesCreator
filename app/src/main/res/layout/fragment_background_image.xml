@@ -36,7 +36,7 @@
                 android:tint="#d00"
                 android:background="@drawable/shape_rounded_corner"
                 android:layout_marginEnd="5dp"
-                android:elevation="4dp"
+                android:elevation="2dp"
                 android:onClick="onRemoveBackgroundClick"
                 android:visibility="gone" />
 
@@ -46,12 +46,27 @@
 
                 android:adjustViewBounds="true"
                 android:background="@drawable/shape_rounded_corner"
-                android:elevation="4dp"
+                android:elevation="2dp"
                 android:onClick="onSelectImageFromGalleryClick"
                 android:padding="5dp"
                 android:scaleType="fitCenter"
                 android:tint="#000"
                 android:src="@drawable/gallery_vector" />
+
+
+            <ImageButton
+                android:id="@+id/button_show_internet_image_picker"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="5dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/shape_rounded_corner"
+                android:elevation="2dp"
+                android:onClick="onSelectImageFromInternetClick"
+                android:padding="5dp"
+                android:scaleType="fitCenter"
+                android:tint="#000"
+                android:src="@drawable/more_images" />
 
 
         </LinearLayout>

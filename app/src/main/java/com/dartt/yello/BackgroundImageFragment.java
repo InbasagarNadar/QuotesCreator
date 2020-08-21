@@ -58,7 +58,9 @@ public class BackgroundImageFragment extends Fragment {
                 }
             });
         }
-
+        View buttonShowInternetImagePicker = fragment.findViewById(R.id.button_show_internet_image_picker);
+        backgroundImageButtonList.removeView(buttonShowInternetImagePicker);
+        backgroundImageButtonList.addView(buttonShowInternetImagePicker);
         return fragment;
     }
 }

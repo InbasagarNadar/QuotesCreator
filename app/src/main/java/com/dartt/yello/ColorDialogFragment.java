@@ -1,23 +1,33 @@
 package com.dartt.yello;
 
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import androidx.fragment.app.DialogFragment;
+
+import com.dartt.yello.views.CustomColorPickerView;
+import com.jaredrummler.android.colorpicker.ColorPickerView;
 
 public class ColorDialogFragment extends DialogFragment {
 
-
-/*
-
-
+    int oldColor;
+    final float LUMINANCE_POINT = 100;
     CreateBackgroundActivity activity;
     LinearLayout colors_parent;
     CustomColorPickerView colorPickerView;
 
-    ImageView oldColorImageView;
+    Button oldColorButton;
     Button hexCodeButton;
     Button okButton;
     TextView colorCountTextView;
 
-    ColorDialogListener listener;
+    Listener listener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,18 +37,26 @@ public class ColorDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.bottom_sheet_color, container, false);
+        oldColor = getArguments().getInt("color");
         activity = (CreateBackgroundActivity) getActivity();
         colorPickerView = v.findViewById(R.id.color_picker);
         colorCountTextView = v.findViewById(R.id._color_count_text_view);
         colors_parent = v.findViewById(R.id.color_parent);
 
         okButton = v.findViewById(R.id.confirm_button);
-        hexCodeButton = v.findViewById(R.id.hex_code_button);
+        hexCodeButton = v.findViewById(R.id.new_color_image);
+        oldColorButton = v.findViewById(R.id.old_color_image);
+        oldColorButton.setBackground(Variables.newColorDrawable(activity, oldColor, Variables.CORNER_DP));
+        oldColorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setColor(oldColor);
+            }
+        });
 
         colorPickerView.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
             @Override
             public void onColorChanged(int newColor) {
-                setButtonColor(currentColorButtonIndex, newColor);
                 updateHex(newColor);
             }
         });
@@ -46,6 +64,7 @@ public class ColorDialogFragment extends DialogFragment {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                listener.onColorSelected(colorPickerView.getColor());
                 dismiss();
             }
         });
@@ -55,12 +74,15 @@ public class ColorDialogFragment extends DialogFragment {
                 dismiss();
             }
         });
-
+        setColor(oldColor);
+        oldColorButton.setText(String.format("#%s", Integer.toHexString(oldColor).substring(2).toUpperCase()));
+        if (luminanceOf(oldColor) > LUMINANCE_POINT) {
+            oldColorButton.setTextColor(Color.BLACK);
+        }
+        else {
+            oldColorButton.setTextColor(Color.WHITE);
+        }
         return v;
-    }
-
-    void setColorViewColor(int newColor){
-        colorPickerView.setColor(newColor);
     }
 
     float luminanceOf(int color) {
@@ -73,76 +95,30 @@ public class ColorDialogFragment extends DialogFragment {
     void updateHex(int newColor) {
         hexCodeButton.setBackground(Variables.newColorDrawable(activity, newColor, Variables.CORNER_DP));
         hexCodeButton.setText(String.format("#%s", Integer.toHexString(newColor).substring(2).toUpperCase()));
-        if(luminanceOf(newColor)>LUMINANCE_POINT) {
+        if (luminanceOf(newColor) > LUMINANCE_POINT) {
             hexCodeButton.setTextColor(0xFF000000);
         }
-        else{
+        else {
             hexCodeButton.setTextColor(0xFFFFFFFF);
         }
     }
 
-    void setButtonColor(int index, int color) {
-        colors[index] = color;
-        if(luminanceOf(color)>LUMINANCE_POINT) {
-            colorButtons[index].setTextColor(0xFF000000);
-        }
-        else{
-            colorButtons[index].setTextColor(0xFFFFFFFF);
-        }
-        colorButtons[index].setBackground(Variables.newColorDrawable(activity, color, Variables.CORNER_DP));
-        refreshGradientImage();
+    void setColor(int color) {
+        updateHex(color);
+        colorPickerView.setColor(color);
     }
 
-
-    interface ColorDialogListener {
-        void onColorSelected(int[] gradient, Orientation orientation);
+    public static ColorDialogFragment newInstance(int color, Listener listener) {
+        Bundle args = new Bundle();
+        args.putInt("color", color);
+        ColorDialogFragment fragment = new ColorDialogFragment();
+        fragment.listener = listener;
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    class OrientationSelectAdapter extends ArrayAdapter<String> {
+    interface Listener {
+        void onColorSelected(int color);
+    }
 
-        View spinnerDisplayView;
-        LayoutInflater inflater;
-        String[] labels;
-
-        public OrientationSelectAdapter(@NonNull Context context) {
-            super(context, R.layout.support_simple_spinner_dropdown_item);
-            inflater = LayoutInflater.from(context);
-            labels = new String[]{"0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"};
-        }
-
-        @Override
-        public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-
-            View view = inflater.inflate(R.layout.spinner_image_text, null);
-            ImageView icon = view.findViewById(R.id.spinner_image);
-            TextView textView = view.findViewById(R.id.spinner_text);
-            icon.setClipToOutline(true);
-            int[] gradient = new int[colorCount];
-            System.arraycopy(colors, 0, gradient, 0, colorCount);
-            icon.setImageDrawable(Variables.newGradientDrawable(activity, gradient, orientations[position], Variables.CORNER_DP));
-
-            textView.setTextColor(0xFF000000);
-
-            textView.setText(labels[position]);
-            return view;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.support_simple_spinner_dropdown_item, null);
-            }
-            ((TextView) convertView).setText(labels[position]);
-            ((TextView) convertView).setGravity(Gravity.CENTER);
-            spinnerDisplayView = convertView;
-            return convertView;
-        }
-
-
-        @Override
-        public int getCount() {
-            return labels.length;
-        }
-    }*/
 }
