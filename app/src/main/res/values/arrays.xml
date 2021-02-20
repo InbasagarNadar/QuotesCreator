@@ -1,0 +1,60 @@
+<resources>
+    <string-array name="export_entries">
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
+    <string-array name="export_values">
+        <item>1440</item>
+        <item>1080</item>
+        <item>720</item>
+    </string-array>
+
+    <string-array name="format_entries">
+        <item>Png</item>
+        <item>Jpg</item>
+    </string-array>
+    <string-array name="format_values">
+        <item>png</item>
+        <item>jpg</item>
+    </string-array>
+
+
+    <string-array name="faq_questions">
+        <item>How to select background image?</item>
+        <item>How to select solid background?</item>
+        <item>How to select gradient?</item>
+        <item>How to change background size/template size?</item>
+        <item>How to add/edit text?</item>
+        <item>How to add stickers?</item>
+        <item>Why is filter button not visible?</item>
+        <item>Where does colour and gradient disappear?</item>
+        <item>How to save quotes?</item>
+        <item>How to add filter?</item>
+        <item>How to remove logo watermark?</item>
+        <item>How to share a quote?</item>
+        <item>Why watch ads?</item>
+        <item>What is your Privacy Policy?</item>
+        <item>Team behind Yello Quotes</item>
+
+    </string-array>
+
+    <string-array name="faq_answers">
+        <item>There are 20+ images available for offline usage. You can explore our online gallery for more image categories. Find the option at the end of the image scroll. Click on the Gallery icon (1st icon) and select an image from your mobile.</item>
+        <item>Click on the Colour Palette (2nd icon) in the home page. There will find solid background options. Click on the icon with an arrow and find more options. Use the colour picker to get a solid background of your choice.</item>
+        <item>You will find the gradient along with the solid background option in the Colour Palette (2nd icon). Please refer the above answer.</item>
+        <item>Click on the Resize/Ratio (3rd icon) on the home page and select one that suits your requirement.</item>
+        <item>Click on \'T\' icon and open the text editor. Here you can add text, select font type, select font size, change font colour, add background box to font and change the spacing between the lines and individual words . You can also Bold, Italic, Underline and Align your content.</item>
+        <item>Click on the Smiley Sticker (5th icon) in the home page and find interesting stickers in our offline library. </item>
+        <item>Find Contrast, Brightness and Saturation options after you select an image/background and adjust it accordingly.</item>
+        <item>You will find the solid colour backgrounds and chosen gradients behind the image selected (if any). You can adjust, remove layers.</item>
+        <item>Click on the save option at the right hand – top corner of the app. Here you can also add filters to the image. You can also adjust the filter strength and change the background template. Click on download to save the quote. To remove our logo watermark please watch a small ad and support us.</item>
+        <item>Click on the save option at the right hand – top corner of the app. Here you can add filters to the image. You can also adjust the filter strength and change the background template. Click on download to save the quote.</item>
+        <item>We run ads on our app to support our small business. In order to do so, we request you that you watch an ad and remove the logo watermark placed on your quote, creative, template, or image.</item>
+        <item>Click on save image. Find the share option in the bottom of the page. You can share the quote/image to Instagram, Facebook, WhatsApp, etc.</item>
+        <item>Yello Quotes Creator is available on the Play Store for free. We request our users to support our imitative of creating user friendly apps by watching the ads we run on the app. If you want to help us to continue providing you our services for free please check out the ‘Support Us’ section in the settings panel.</item>
+        <item>We do not store or share any user data. The apps permissions for storage are only for your quotes to be saved in your gallery. Beyond that the app does not interact with any other settings on your phone or requires additional permissions. For any concerns you can reach out to us at yello.darttdevelopers@gmail.com</item>
+        <item>Co-founder: Inbasagar Nadar, Indian Game &amp; App Developer\nCo-founder: Garima Bhatt, Marketing Head &amp; Strategy Consultant</item>
+    </string-array>
+
+</resources>

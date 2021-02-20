@@ -87,6 +87,7 @@
             android:id="@+id/orientation_spinner"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:backgroundTint="@color/sandal"
             android:background="@drawable/shape_rounded_corner"
             android:popupBackground="@drawable/shape_rounded_corner"
             android:spinnerMode="dropdown" />

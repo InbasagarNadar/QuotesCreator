@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import com.dartt.yello.views.CustomColorPickerView;
@@ -26,6 +27,7 @@ public class ColorDialogFragment extends DialogFragment {
     Button hexCodeButton;
     Button okButton;
     TextView colorCountTextView;
+
 
     Listener listener;
 
@@ -74,12 +76,15 @@ public class ColorDialogFragment extends DialogFragment {
                 dismiss();
             }
         });
-        setColor(oldColor);
+        if (savedInstanceState == null) {
+            setColor(oldColor);
+        } else {
+            setColor(savedInstanceState.getInt("selected_color"));
+        }
         oldColorButton.setText(String.format("#%s", Integer.toHexString(oldColor).substring(2).toUpperCase()));
         if (luminanceOf(oldColor) > LUMINANCE_POINT) {
             oldColorButton.setTextColor(Color.BLACK);
-        }
-        else {
+        } else {
             oldColorButton.setTextColor(Color.WHITE);
         }
         return v;
@@ -115,6 +120,12 @@ public class ColorDialogFragment extends DialogFragment {
         fragment.listener = listener;
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("selected_color", colorPickerView.getColor());
     }
 
     interface Listener {

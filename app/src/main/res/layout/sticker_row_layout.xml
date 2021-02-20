@@ -7,25 +7,12 @@
     android:paddingBottom="10dp">
 
     <ImageButton
-        android:id="@+id/image_view_0"
+        android:id="@+id/image_view"
         android:layout_width="100dp"
+        android:scaleType="centerInside"
         android:layout_height="100dp"
         android:layout_marginEnd="5dp"
         android:background="@null"
-        android:padding="20dp" />
+        android:padding="15dp" />
 
-    <ImageButton
-        android:id="@+id/image_view_1"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginEnd="5dp"
-        android:background="@null"
-        android:padding="20dp" />
-
-    <ImageButton
-        android:id="@+id/image_view_2"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:background="@null"
-        android:padding="20dp" />
 </LinearLayout>

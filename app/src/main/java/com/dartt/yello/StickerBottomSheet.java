@@ -46,7 +46,7 @@ public class StickerBottomSheet extends BottomSheetDialogFragment {
 
         public StickerViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.image_view_0);
+            imageView = itemView.findViewById(R.id.image_view);
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -79,7 +79,7 @@ public class StickerBottomSheet extends BottomSheetDialogFragment {
 
         @Override
         public void onBindViewHolder(@NonNull StickerViewHolder holder, int position) {
-            Glide.with(context).load(Variables.stickerResourceId[position]).into(holder.imageView);
+            Glide.with(context).load(Variables.stickerResourceId[position]).fitCenter().into(holder.imageView);
             //Glide.with(context).load(Variables.stickerResourceId[position * 3 + 1]).into(holder.imageViews[1]);
             //Glide.with(context).load(Variables.stickerResourceId[position * 3 + 2]).into(holder.imageViews[2]);
         }

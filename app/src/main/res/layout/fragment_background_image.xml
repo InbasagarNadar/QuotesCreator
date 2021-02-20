@@ -4,16 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/create_background_fragment_height"
-
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     tools:context=".CreateBackgroundActivity">
 
 
     <HorizontalScrollView
+        android:id="@+id/horizontal_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-
         android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -21,37 +20,34 @@
             android:id="@+id/background_image_linear_layout"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
-            android:padding="5dp"
-            android:clipToPadding="false"
             android:animateLayoutChanges="true"
-            android:orientation="horizontal">
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:padding="5dp">
 
             <ImageButton
-                android:id="@+id/remove_background_button"
+                android:id="@+id/btn_remove_background"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/trash_can_vector"
-                android:scaleType="centerInside"
-                android:padding="5dp"
-                android:tint="#d00"
-                android:background="@drawable/shape_rounded_corner"
                 android:layout_marginEnd="5dp"
+                android:background="@drawable/shape_rounded_corner"
                 android:elevation="2dp"
-                android:onClick="onRemoveBackgroundClick"
-                android:visibility="gone" />
+                android:padding="5dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/trash_can_vector"
+                android:tint="#d00" />
 
             <ImageButton
+                android:id="@+id/img_btn_gallery_background"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-
                 android:adjustViewBounds="true"
                 android:background="@drawable/shape_rounded_corner"
                 android:elevation="2dp"
-                android:onClick="onSelectImageFromGalleryClick"
                 android:padding="5dp"
                 android:scaleType="fitCenter"
-                android:tint="#000"
-                android:src="@drawable/gallery_vector" />
+                android:src="@drawable/gallery_vector"
+                android:tint="#000" />
 
 
             <ImageButton
@@ -62,11 +58,10 @@
                 android:adjustViewBounds="true"
                 android:background="@drawable/shape_rounded_corner"
                 android:elevation="2dp"
-                android:onClick="onSelectImageFromInternetClick"
                 android:padding="5dp"
                 android:scaleType="fitCenter"
-                android:tint="#000"
-                android:src="@drawable/more_images" />
+                android:src="@drawable/more_images"
+                android:tint="#000" />
 
 
         </LinearLayout>

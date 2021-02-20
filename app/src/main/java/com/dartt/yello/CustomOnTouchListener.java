@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 public abstract class CustomOnTouchListener implements View.OnTouchListener {
     SparseArray<TouchData> activeTouches = new SparseArray<>();
     boolean click = true;
-    final float minDrag = 4;
+    final float minDrag = 10;
     float dragThreshold = 0;
 
     @Override
@@ -44,12 +44,42 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                /*
                 dragThreshold++;
-                if (dragThreshold > minDrag || true) {
-                    click = false;
+                if (dragThreshold > minDrag ) {
                     int pointerId0 = motionEvent.getPointerId(0);
                     TouchData touchData0 = activeTouches.get(pointerId0);
                     touchData0.setCurrentPosition(new Vector2D(view, motionEvent, 0));
+                    if(click){
+                        //To reset drag, caused because of ignoring drag withing drag threshold
+                        touchData0.setCurrentPosition(new Vector2D(view, motionEvent, 0));
+                        onDragStart(touchData0);
+                    }
+                    click = false;
+                    switch (motionEvent.getPointerCount()) {
+                        case 1:
+                            onOneFingerDrag(touchData0);
+                            break;
+                        case 2:
+                            int pointerId1 = motionEvent.getPointerId(1);
+                            TouchData touchData1 = activeTouches.get(pointerId1);
+                            touchData1.setCurrentPosition(new Vector2D(view, motionEvent, 1));
+                            onTwoFingerDrag(new PinchData(touchData0, touchData1));
+                            break;
+                    }
+                }
+                */
+                int pointerId0 = motionEvent.getPointerId(0);
+                TouchData touchData0 = activeTouches.get(pointerId0);
+                touchData0.setCurrentPosition(new Vector2D(view, motionEvent, 0));
+                dragThreshold += Math.abs(touchData0.getDeltaPosition().x) + Math.abs(touchData0.getDeltaPosition().y);
+                if (dragThreshold > minDrag) {
+                    if (click) {
+                        //To reset drag, caused because of ignoring drag withing drag threshold
+                        //touchData0.setCurrentPosition(new Vector2D(view, motionEvent, 0));
+                        onDragStart(touchData0);
+                        click = false;
+                    }
                     switch (motionEvent.getPointerCount()) {
                         case 1:
                             onOneFingerDrag(touchData0);
@@ -87,4 +117,6 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
     abstract void onTwoFingerDrag(PinchData pinchData);
 
     abstract void onFingerUp(int fingerCount, TouchData touchData, boolean click);
+
+    abstract void onDragStart(TouchData touchData);
 }

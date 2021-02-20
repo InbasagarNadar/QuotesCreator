@@ -16,9 +16,9 @@ class Vector2D {
     Vector2D() {
     }
 
-    static Vector2D getPositionRelativeToParent(View parent, MotionEvent motionEvent) {
+   /* static Vector2D getPositionRelativeToParent(View parent, MotionEvent motionEvent) {
         return new Vector2D((int) motionEvent.getRawX() - parent.getLeft(), (int) motionEvent.getRawY() - parent.getTop() - EditorActivity.statusBarHeight);
-    }
+    }*/
 
     Vector2D minus(Vector2D rhs) {
         return new Vector2D(this.x - rhs.x, this.y - rhs.y);

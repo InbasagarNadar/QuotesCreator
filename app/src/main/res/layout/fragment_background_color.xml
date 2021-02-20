@@ -6,7 +6,7 @@
     android:layout_height="@dimen/create_background_fragment_height"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
-    tools:context=".CreateBackgroundActivity">
+    tools:context=".BackgroundColorFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -29,13 +29,12 @@
                 android:orientation="horizontal">
 
                 <ImageButton
-                    android:id="@+id/button_pick_background_fill_color"
+                    android:id="@+id/img_btn_pick_art_board_color"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginLeft="2dp"
                     android:background="@drawable/shape_rounded_corner"
                     android:elevation="1dp"
-                    android:onClick="onShowColorPicker"
                     android:outlineProvider="background"
                     android:padding="0dp"
                     android:scaleType="fitCenter"
@@ -59,12 +58,12 @@
                 android:orientation="horizontal">
 
                 <ImageButton
+                    android:id="@+id/img_btn_pick_art_board_gradient"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginLeft="2dp"
                     android:background="@drawable/shape_rounded_corner"
                     android:elevation="1dp"
-                    android:onClick="onShowGradientPicker"
                     android:outlineProvider="background"
                     android:padding="0dp"
                     android:scaleType="fitCenter"
@@ -80,42 +79,6 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <LinearLayout
-        android:id="@+id/backgroundFillLinearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/backgroundFillText">
-
-        <Button
-            android:id="@+id/button_show_background_colors"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:onClick="onShowColorListClick" />
-
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-
-        <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:backgroundTint="#0000"
-            android:onClick="onShowGradientListClick"
-            android:padding="5dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/gradient" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/backgroundFillText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Fill Type"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -130,7 +93,7 @@
             android:id="@+id/background_fill_spinner"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/arrow_bottom_right"
+            android:background="@null"
             android:popupBackground="@drawable/shape_rounded_corner"
             android:spinnerMode="dropdown" />
 

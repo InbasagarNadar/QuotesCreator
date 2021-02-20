@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="50dp"
+    android:animateLayoutChanges="true"
+    android:background="#7000"
+    android:visibility="gone"
+    android:clickable="true"
+    tools:context=".StickerEditorFragment">
+
+    <ImageButton
+        android:id="@+id/btn_sticker_commit"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="10dp"
+        android:background="@null"
+
+        android:src="@drawable/icon_check_vector"
+        android:tint="#fff"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_sticker_cancel"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="10dp"
+        android:background="@null"
+
+        android:src="@drawable/icon_clear_vector"
+        android:textColor="@android:color/white"
+        android:tint="#fff"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_sticker_delete"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="10dp"
+        android:background="@null"
+
+        android:src="@drawable/trash_can_vector"
+        android:tint="#F32013"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/sticker_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="15dp"
+        android:padding="50dp"
+        android:src="@drawable/sticker_29_cat"
+        app:layout_constraintBottom_toTopOf="@id/sticker_options_panel"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_sticker_commit" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sticker_options_panel"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginEnd="127dp"
+        android:background="@drawable/shape_rounded_corner"
+        android:backgroundTint="@color/sandal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/_sticker_opacity_icon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/shape_left_rounded"
+            android:backgroundTint="#F5F8DE"
+            android:padding="8dp"
+            app:tint="#000"
+            android:src="@drawable/ic_opacity"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <SeekBar
+            android:id="@+id/seekBar_sticker_opacity"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/_sticker_opacity_icon"
+            android:max="100"
+            app:layout_constraintLeft_toRightOf="@id/_sticker_opacity_icon"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintWidth_default="spread" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageButton
+        android:id="@+id/btn_flip_horizontal"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/shape_rounded_corner"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_flip_horizontal"
+        app:layout_constraintBottom_toBottomOf="@id/sticker_options_panel"
+        app:layout_constraintLeft_toRightOf="@id/sticker_options_panel"
+        app:layout_constraintTop_toTopOf="@id/sticker_options_panel" />
+
+    <ImageButton
+        android:id="@+id/btn_flip_vertical"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/shape_rounded_corner"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_flip_vertical"
+        app:layout_constraintBottom_toBottomOf="@id/sticker_options_panel"
+        app:layout_constraintLeft_toRightOf="@id/btn_flip_horizontal"
+        app:layout_constraintTop_toTopOf="@id/sticker_options_panel" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+

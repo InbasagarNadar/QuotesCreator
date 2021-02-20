@@ -21,11 +21,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="20dp"
-        android:text="Dartt Apps"
+        android:layout_marginBottom="30dp"
+        android:text="Dartt Developers"
         android:fontFamily="@font/montserrat_light"
 
         android:textColor="#000"
         android:textSize="20dp"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="10dp"
+        android:text="Made in India"
+        android:fontFamily="@font/montserrat_bold"
+
+        android:textColor="#000"
+        android:textSize="12dp"
         android:gravity="center" />
 </androidx.constraintlayout.widget.ConstraintLayout>

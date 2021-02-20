@@ -5,7 +5,7 @@ import android.widget.FrameLayout;
 import java.util.List;
 
 public class CanvasManager {
-    List<CreateBackgroundActivity.ViewContainer> elements;
+    List<ViewContainer> elements;
     FrameLayout canvas;
 
 }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+
+    tools:context=".EditorFragment">
+
+    <FrameLayout
+        android:id="@+id/frame_canvas"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_weight="1">
+
+
+        <View
+            android:translationZ="1dp"
+
+            android:id="@+id/alignment_guide_x"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="-1000dp"
+            android:background="#00BCD4"
+            android:clickable="false"
+            android:focusable="false"
+            android:foregroundGravity="center" />
+
+        <View
+            android:translationZ="1dp"
+
+            android:id="@+id/alignment_guide_y"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="-1000dp"
+            android:background="#00BCD4"
+            android:clickable="false"
+            android:focusable="false"
+            android:foregroundGravity="center" />
+
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

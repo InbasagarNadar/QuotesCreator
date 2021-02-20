@@ -15,23 +15,21 @@
         <ImageButton
             android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:background="#0000"
+            android:background="?attr/selectableItemBackground"
             android:src="@drawable/icon_back_arrow"
-            android:tint="#000"
-            android:onClick="onCancelClick"
-            android:textColor="@color/colorAccent"
-            android:textSize="35dp" />
+            android:tint="@color/colorAccent"
+            android:onClick="onCancelClick" />
 
 
         <TextView
-
+            android:fontFamily="@font/grandhotel_regular"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="50dp"
-            android:textSize="20dp"
+            android:textSize="30dp"
             android:gravity="center"
             android:text="Select Background"
-            android:textColor="#000" />
+            android:textColor="@color/colorAccent" />
     </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -45,11 +43,127 @@
         tools:context=".ServerImagesActivity">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
+            android:id="@+id/image_recycler_view"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/category_recycler_view"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_marginTop="50dp"
+        android:id="@+id/loading_panel"
+        android:background="#2000"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true">
+
+        <ProgressBar
+            android:id="@+id/_progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:indeterminate="true" />
+
+        <TextView
+            app:layout_constraintTop_toBottomOf="@id/_progressBar"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:text="Loading... Please wait."
+            android:layout_marginTop="20dp"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="gone"
+        android:layout_marginTop="50dp"
+        android:id="@+id/retry_categories_panel"
+        android:background="#2000"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true">
+
+        <ImageButton
+            android:src="@drawable/ic_refresh"
+            android:background="?attr/selectableItemBackground"
+            android:id="@+id/retry_categories_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="0dp"
+            android:onClick="onRetryCategoryClick"
+            android:tint="@color/colorAccent"
+            android:scaleType="fitCenter"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:indeterminate="true" />
+
+        <TextView
+            app:layout_constraintTop_toBottomOf="@id/retry_categories_button"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:text="Failed Loading Categories."
+            android:layout_marginTop="20dp"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="gone"
+        android:layout_marginTop="50dp"
+        android:id="@+id/retry_images_panel"
+        android:background="#2000"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true">
+
+        <ImageButton
+            android:src="@drawable/ic_refresh"
+            android:background="?attr/selectableItemBackground"
+            android:id="@+id/retry_images_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="0dp"
+            android:onClick="onRetryImagesClick"
+            android:tint="@color/colorAccent"
+            android:scaleType="fitCenter"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:indeterminate="true" />
+
+        <TextView
+            app:layout_constraintTop_toBottomOf="@id/retry_images_button"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:text="Failed Loading Categories."
+            android:layout_marginTop="20dp"
+            android:textSize="16dp"
+            android:textColor="#000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

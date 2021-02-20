@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fixedParent"
             android:layout_width="match_parent"
@@ -21,14 +20,13 @@
                 android:id="@+id/adFrame"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-
                 app:layout_constraintBottom_toBottomOf="parent">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="Dartt Apps"
+                    android:text="Dartt Developers"
                     android:textStyle="bold"
                     android:background="@color/sandal"
                     android:fontFamily="@font/montserrat_light" />
@@ -38,46 +36,80 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    ads:adSize="SMART_BANNER"
-                    ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+                    ads:adSize="BANNER"
+                    ads:adUnitId="@string/ad_unit_banner" />
             </FrameLayout>
-            <FrameLayout
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/actionBar"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@color/sandal"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <Button
+                <ImageButton
+                    android:id="@+id/btn_ham"
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
-                    android:background="#0000"
-                    android:text="≡"
+                    android:background="?attr/selectableItemBackground"
                     android:onClick="onHamClick"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="35dp" />
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/icon_ham_vector"
+                    android:tint="@color/colorAccent"
+
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <ImageButton
+
+                    android:id="@+id/btn_save"
+                    style="@style/imageButtonTint"
                     android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_height="match_parent"
                     android:layout_gravity="right"
+                    android:backgroundTint="@color/sandal"
+                    android:contentDescription="Save"
                     android:onClick="onSaveClick"
                     android:scaleType="fitCenter"
-                    android:tint="#222"
-                    android:backgroundTint="#0000"
-                    android:src="@drawable/save_floppy" />
+                    android:src="@drawable/save_floppy"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/btn_redo"
+                    style="@style/imageButtonTint"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    android:backgroundTint="@color/sandal"
+                    android:contentDescription="Redo"
+                    android:onClick="onRedoClick"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_baseline_redo_24"
+                    app:layout_constraintEnd_toStartOf="@id/btn_save" />
+
+                <ImageButton
+                    android:id="@+id/btn_undo"
+                    style="@style/imageButtonTint"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    android:backgroundTint="@color/sandal"
+                    android:contentDescription="Undo"
+                    android:onClick="onUndoClick"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_baseline_undo_24"
+                    app:layout_constraintEnd_toStartOf="@id/btn_redo" />
 
                 <TextView
-
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="50dp"
                     android:fontFamily="@font/grandhotel_regular"
                     android:gravity="center"
                     android:text="Yello"
                     android:textColor="@color/colorAccent"
-                    android:textSize="35dp" />
-            </FrameLayout>
+                    android:textSize="35dp"
+                    app:layout_constraintStart_toEndOf="@id/btn_ham" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -87,30 +119,108 @@
                 android:layout_marginTop="50dp"
                 android:layout_marginBottom="50dp">
 
-                <ImageButton
-                    style="?android:borderlessButtonStyle"
-                    android:layout_width="50dp"
+                <androidx.gridlayout.widget.GridLayout
+                    android:id="@+id/option_menu"
+                    android:layout_width="match_parent"
                     android:layout_height="35dp"
-                    android:background="@color/colorAccent"
-                    android:onClick="onShowForegroundEditorClick"
-                    android:tint="#000"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginEnd="50dp"
+                    app:layout_constraintBottom_toBottomOf="parent">
 
-                    android:scaleType="centerInside"
-                    android:padding="5dp"
-                    android:src="@drawable/text_vector"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:contentDescription="Foreground Editor" />
+                    <ImageButton
+                        android:id="@+id/button_canvas_image"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Images"
+                        android:onClick="onShowBackgroundImagesFragmentClick"
+                        android:src="@drawable/gallery_vector"
+                        android:tint="@color/colorAccent"
+                        app:layout_columnWeight="1" />
 
-                <FrameLayout
-                    android:id="@+id/backgroundCanvas"
+                    <ImageButton
+                        android:id="@+id/button_canvas_fill"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Colors"
+                        android:onClick="onShowBackgroundColorFragmentClick"
+                        android:src="@drawable/icon_color_palette_vector"
+                        android:tint="#000"
+                        app:layout_columnWeight="1" />
+
+                    <ImageButton
+                        android:id="@+id/button_canvas_ratio"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Aspect Ratio"
+                        android:onClick="onShowRatioFragmentClick"
+                        android:src="@drawable/icon_crop_vector"
+                        android:tint="#000"
+                        app:layout_columnWeight="1" />
+
+                    <ImageButton
+                        android:id="@+id/button_filter"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Filter"
+                        android:onClick="onShowFilterFragmentClick"
+                        android:src="@drawable/ic_photo_filter"
+                        android:tint="#000"
+                        android:visibility="visible"
+                        app:layout_columnWeight="1" />
+
+                    <ImageButton
+                        android:id="@+id/button_add_text"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Text"
+                        android:onClick="onAddTextClick"
+                        android:src="@drawable/icon_text_vector"
+                        app:layout_columnWeight="1" />
+
+                    <ImageButton
+                        android:id="@+id/button_add_sticker"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Stickers"
+                        android:onClick="onShowStickerSheetClick"
+                        android:src="@drawable/icon_sticker_vector"
+                        app:layout_columnWeight="1" />
+
+                </androidx.gridlayout.widget.GridLayout>
+
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:name="com.dartt.yello.EditorFragment"
+                    android:id="@+id/frame_editor_fragment"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:layout_marginBottom="5dp"
 
-                    android:background="#fff"
-                    android:elevation="7dp"
+
                     app:layout_constraintBottom_toTopOf="@id/viewPager"
-                    app:layout_constraintDimensionRatio="H,1:1"
+
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:layout_constraintVertical_weight="1" />
+
+                <FrameLayout
+                    android:id="@+id/canvas"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="#fff"
+                    android:visibility="gone"
+
+                    app:layout_constraintBottom_toTopOf="@id/viewPager"
+                    app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -123,89 +233,8 @@
                         android:layout_height="wrap_content"
                         android:clickable="false"
                         android:focusable="false" />
-
                     <View
-                        android:id="@+id/snapperX"
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="#00BCD4"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:visibility="invisible" />
-
-                    <View
-                        android:id="@+id/snapperY"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#00BCD4"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:visibility="invisible" />
-                </FrameLayout>
-
-
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/viewPager"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/create_background_fragment_height"
-                    app:layout_constraintBottom_toTopOf="@id/tabLayout" />
-
-
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tabLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginEnd="50dp"
-                    app:layout_constraintBottom_toBottomOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/foregroundEditorParent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="50dp"
-                android:layout_marginBottom="50dp"
-                android:visibility="invisible">
-
-                <ImageButton
-                    style="?android:borderlessButtonStyle"
-                    android:layout_width="50dp"
-                    android:layout_height="35dp"
-                    android:background="@color/colorAccent"
-                    android:elevation="10dp"
-                    android:scaleType="centerInside"
-                    android:padding="5dp"
-                    android:onClick="onShowBackgroundEditorClick"
-                    android:tint="#000"
-                    android:src="@drawable/gallery_vector"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:contentDescription="Background Editor" />
-
-                <FrameLayout
-                    android:id="@+id/foregroundCanvas"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="#0dd"
-                    android:elevation="7dp"
-                    app:layout_constraintBottom_toTopOf="@id/foregroundEditorOptions"
-                    app:layout_constraintDimensionRatio="H,9:16"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.0"
-                    app:layout_constraintVertical_weight="1">
-
-
-                    <ImageView
-                        android:id="@+id/fg_backgroundImageView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:focusable="false" />
-
-                    <View
-                        android:id="@+id/foregroundAlignmentGuideX"
+                        android:id="@+id/alignment_guide_x"
                         android:layout_width="2dp"
                         android:layout_height="match_parent"
                         android:layout_marginStart="-100dp"
@@ -215,7 +244,7 @@
                         android:foregroundGravity="center" />
 
                     <View
-                        android:id="@+id/foregroundAlignmentGuideY"
+                        android:id="@+id/alignment_guide_y"
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
                         android:layout_marginTop="-100dp"
@@ -223,56 +252,23 @@
                         android:clickable="false"
                         android:focusable="false"
                         android:foregroundGravity="center" />
-
                 </FrameLayout>
 
-                <RelativeLayout
-                    android:id="@+id/foregroundEditorOptions"
+
+                <com.dartt.yello.views.NonSwipeableViewPager
+                    android:id="@+id/viewPager"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginEnd="50dp"
-                    android:elevation="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent">
+                    android:layout_height="@dimen/create_background_fragment_height"
+                    app:layout_constraintBottom_toTopOf="@id/option_menu" />
 
-                    <Button
-                        android:id="@+id/button_add_text"
-                        style="?android:borderlessButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:background="#eee"
-                        android:onClick="onAddTextClick"
-                        android:text="Text" />
 
-                    <Button
-                        android:id="@+id/btn2"
-                        style="?android:borderlessButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_toEndOf="@+id/button_add_text"
-                        android:onClick="onShowStickerSheetClick"
-                        android:background="#ddd"
-                        android:text="Sticker" />
-
-                    <Button
-                        android:id="@+id/btn3"
-                        style="?android:borderlessButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_toEndOf="@+id/btn2"
-                        android:background="#eee"
-                        android:text="Shape" />
-
-                    <Button
-                        android:id="@+id/btn4"
-                        style="?android:borderlessButtonStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_toEndOf="@+id/btn3"
-                        android:background="#ddd"
-                        android:text="Frame" />
-
-                </RelativeLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/sticker_editor_fragment"
+                android:name="com.dartt.yello.StickerEditorFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:visibility="gone"
@@ -291,7 +287,6 @@
                     android:layout_margin="10dp"
                     android:background="@null"
                     android:tint="#fff"
-                    android:onClick="onCommitTextClick"
                     android:src="@drawable/icon_check_vector"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -302,7 +297,6 @@
                     android:layout_height="25dp"
                     android:layout_margin="10dp"
                     android:background="@null"
-                    android:onClick="onCancelTextClick"
                     android:src="@drawable/icon_clear_vector"
                     android:tint="#fff"
                     android:textColor="@android:color/white"
@@ -315,7 +309,6 @@
                     android:layout_height="25dp"
                     android:layout_margin="10dp"
                     android:background="@null"
-                    android:onClick="onDeleteTextClick"
                     android:src="@drawable/trash_can_vector"
                     android:tint="#F32013"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -324,7 +317,7 @@
 
                 <ImageView
                     android:id="@+id/sticker_image_view"
-                    android:src="@drawable/sticker_cat"
+                    android:src="@drawable/sticker_29_cat"
                     android:layout_width="match_parent"
                     android:padding="50dp"
                     android:layout_height="0dp"
@@ -351,14 +344,14 @@
                         android:background="@drawable/shape_left_rounded"
                         android:backgroundTint="#F5F8DE"
                         android:padding="8dp"
-                        android:src="@drawable/letter_spacing"
+                        android:src="@drawable/ic_opacity"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="ContentDescription" />
 
                     <SeekBar
-                        android:id="@+id/sticker_opacity_seekBar"
+                        android:id="@+id/seekBar_sticker_opacity"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_toEndOf="@+id/_sticker_opacity_icon"
@@ -369,414 +362,129 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:visibility="gone"
-            android:id="@+id/textEditor"
-            android:animateLayoutChanges="true"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/text_editor_fragment"
+            android:name="com.dartt.yello.TextEditorFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="50dp"
-            android:background="#7000"
-            android:clickable="true">
-
-            <ImageButton
-                android:id="@+id/button_commit"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_margin="10dp"
-                android:background="@null"
-                android:tint="#fff"
-                android:onClick="onCommitTextClick"
-                android:src="@drawable/icon_check_vector"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/button_cancel"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_margin="10dp"
-                android:background="@null"
-                android:onClick="onCancelTextClick"
-                android:src="@drawable/icon_clear_vector"
-                android:tint="#fff"
-                android:textColor="@android:color/white"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/button_delete_text"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_margin="10dp"
-                android:background="@null"
-                android:onClick="onDeleteTextClick"
-                android:src="@drawable/trash_can_vector"
-                android:tint="#F32013"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_margin="15dp"
-
-                app:layout_constraintBottom_toTopOf="@id/_text_extra_panel"
-                app:layout_constraintTop_toTopOf="@id/button_commit">
-
-                <ScrollView
-                    android:id="@+id/edit_text_scroll_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="15dp"
-                    android:maxHeight="100dp"
-                    tools:ignore="UselessParent">
-
-                    <EditText
-                        android:id="@+id/editTextInput"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:gravity="center"
-
-                        android:hint="Type..."
-                        android:inputType="textMultiLine|textVisiblePassword"
-                        android:textColor="#fff"
-                        android:textColorHint="#fff" />
-                </ScrollView>
-            </FrameLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/font_typeface_panel"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:background="@drawable/shape_top_rounded"
-                android:backgroundTint="@color/sandal"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/_font_typeface_title"
-                    android:background="@drawable/shape_top_rounded"
-                    android:backgroundTint="#F8E9D8"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/font_preview_text"
-                        android:padding="8dp"
-                        android:layout_marginEnd="80dp"
-                        android:fontFamily="@font/montserrat_light"
-                        app:autoSizeTextType="uniform"
-                        android:textColor="#000"
-                        android:text="The quick brown fox jumps over the lazy dog"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageButton
-                        android:id="@+id/font_typeface_cancel"
-                        app:layout_constraintStart_toEndOf="@+id/font_preview_text"
-                        android:layout_width="40dp"
-                        android:tint="#000"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:background="#0000"
-                        android:src="@drawable/icon_clear_vector"
-                        android:layout_height="match_parent" />
-
-                    <ImageButton
-                        android:id="@+id/font_typeface_confirm"
-                        android:tint="#000"
-                        app:layout_constraintStart_toEndOf="@+id/font_typeface_cancel"
-                        android:layout_width="40dp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:background="#0000"
-                        android:src="@drawable/icon_check_vector"
-                        android:layout_height="match_parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <ListView
-                    android:id="@+id/font_list_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:layout_constraintTop_toBottomOf="@id/_font_typeface_title"
-                    app:layout_constraintBottom_toBottomOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <GridLayout
-                android:id="@+id/textEditorOptions"
-                android:layout_width="match_parent"
-                android:layout_height="35dp"
-                android:layout_margin="5dp"
-                android:background="@drawable/shape_rounded_corner"
-                android:backgroundTint="#FFF5F8DE"
-                android:columnCount="7"
-                android:elevation="10dp"
-                app:layout_constraintBottom_toTopOf="@id/font_typeface_panel">
-
-                <ImageButton
-                    android:id="@+id/button_text_toggle_font_panel"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Font Style"
-                    android:onClick="onToggleFontPanelClick"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/font_style_vector"
-                    android:tint="#2A0C4E" />
-
-                <ImageButton
-                    android:id="@+id/button_text_show_typeface"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Font Style"
-                    android:onClick="onShowTypefacePanel"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/font_style_vector"
-                    android:tint="#2A0C4E" />
-
-                <ImageButton
-                    android:id="@+id/button_text_bold"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Bold"
-                    android:onClick="onBoldTextClick"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/bold_vector"
-                    android:tint="#2A0C4E" />
-
-                <ImageButton
-                    android:id="@+id/button_text_italic"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Italic"
-                    android:onClick="onItalicTextClick"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/italic_vector"
-                    android:tint="#2A0C4E" />
-
-                <ImageButton
-                    android:id="@+id/button_text_underline"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Underline"
-                    android:onClick="onUnderlineTextClick"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/underline_vector"
-                    android:tint="#2A0C4E" />
-
-                <ImageButton
-                    android:id="@+id/button_text_align"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Align"
-                    android:onClick="onTextAlignmentClick"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/align_center"
-                    android:tint="#2A0C4E" />
-
-                <ImageButton
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_columnWeight="1"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:contentDescription="Text Color"
-                    android:onClick="onToggleFontColorPicker"
-                    android:padding="5dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/gradient" />
-            </GridLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/_text_extra_panel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="5dp"
-                app:layout_constraintBottom_toTopOf="@id/textEditorOptions">
-
-                <FrameLayout
-                    android:id="@+id/font_color_picker_parent"
-                    android:layout_width="200dp"
-                    android:layout_height="180dp"
-                    android:background="@drawable/shape_rounded_corner"
-                    android:backgroundTint="#FFF5F8DE"
-                    android:padding="2dp"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
-
-                    <com.dartt.yello.views.CustomColorPickerView
-                        android:id="@+id/font_color_picker"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:hueSliderSpacing="5dp"
-                        app:hueSliderWidth="15dp" />
-                </FrameLayout>
-
-                <GridLayout
-                    android:id="@+id/font_options_grid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:columnCount="2"
-                    android:rowCount="2"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
-
-                    <!--androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="0dp"
-                        android:layout_height="35dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginStart="5dp"
-                        android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/sandal">
-
-                        <Spinner
-                            android:id="@+id/fontSpinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:dropDownWidth="match_parent"
-                            android:popupElevation="1dp"
-                            android:spinnerMode="dropdown" />
-                    </androidx.constraintlayout.widget.ConstraintLayout-->
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="0dp"
-                        android:layout_height="35dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginEnd="5dp"
-                        android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/sandal">
-
-                        <ImageView
-
-                            android:id="@+id/_letter_spacing_icon"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/shape_left_rounded"
-                            android:backgroundTint="#F5F8DE"
-                            android:padding="8dp"
-                            android:src="@drawable/letter_spacing"
-                            app:layout_constraintDimensionRatio="1:1"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <SeekBar
-                            android:id="@+id/seekbar_letter_spacing"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_toEndOf="@+id/_letter_spacing_icon"
-                            android:max="100"
-                            app:layout_constraintLeft_toRightOf="@id/_letter_spacing_icon"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintWidth_default="spread" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="0dp"
-                        android:layout_height="35dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginStart="5dp"
-                        android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/sandal">
-
-                        <ImageView
-                            android:id="@+id/_line_spacing_icon"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/shape_left_rounded"
-                            android:backgroundTint="#F5F8DE"
-                            android:padding="8dp"
-                            android:src="@drawable/line_spacing"
-                            app:layout_constraintDimensionRatio="1:1"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <SeekBar
-                            android:id="@+id/seekbar_line_spacing"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_toEndOf="@+id/_line_spacing_icon"
-                            android:max="50"
-                            app:layout_constraintLeft_toRightOf="@id/_line_spacing_icon"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintWidth_default="spread" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="0dp"
-                        android:layout_height="35dp"
-                        android:layout_columnSpan="2"
-                        android:layout_columnWeight="1"
-                        android:layout_marginTop="5dp"
-                        android:background="@drawable/shape_rounded_corner"
-                        android:backgroundTint="@color/sandal">
-
-                        <ImageView
-                            android:id="@+id/_font_size_icon"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/shape_left_rounded"
-                            android:backgroundTint="#F5F8DE"
-                            android:padding="8dp"
-                            android:src="@drawable/font_size_new"
-                            app:layout_constraintDimensionRatio="1:1"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <SeekBar
-                            android:id="@+id/seekBarFontSize"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_toEndOf="@+id/_font_size_icon"
-                            android:max="40"
-                            android:progress="20"
-                            app:layout_constraintLeft_toRightOf="@id/_font_size_icon"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintWidth_default="spread" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                </GridLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="match_parent" />
 
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/drawer"
-        android:layout_width="wrap_content"
+        android:layout_width="275dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:menu="@menu/side_panel"
-        app:headerLayout="@layout/layout_navigation_header" />
+        app:headerLayout="@layout/layout_navigation_header">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="200dp">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="100dp"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/button_navigation_settings"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_settings_vector"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Settings" />
+
+                    <Button
+                        android:id="@+id/button_navigation_fonts"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_baseline_font_download_24"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Fonts/ Languages" />
+
+                    <Button
+                        android:id="@+id/button_navigation_rate_app"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_star"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Rate App" />
+
+                    <Button
+                        android:id="@+id/button_navigation_contact_us"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_contact_mail"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Contact Us" />
+
+                    <Button
+                        android:id="@+id/button_navigation_support_us"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_support_us"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Support Us" />
+
+                    <Button
+                        android:id="@+id/button_faq"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_faq"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="FAQ" />
+                </LinearLayout>
+            </ScrollView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <Button
+                    android:id="@+id/button_navigation_get_featured"
+                    style="@style/NavigationBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_quote"
+                    android:onClick="OnNavigationItemClick"
+                    android:text="Get Featured"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.gridlayout.widget.GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:paddingStart="75dp"
+                    android:paddingEnd="75dp"
+                    app:layout_constraintTop_toBottomOf="@id/button_navigation_get_featured">
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/button_navigation_instagram"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        app:layout_columnWeight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:onClick="OnNavigationItemClick"
+                        android:src="@drawable/ic_instagram" />
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/button_navigation_facebook"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        app:layout_columnWeight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:onClick="OnNavigationItemClick"
+                        android:src="@drawable/ic_facebook" />
+                </androidx.gridlayout.widget.GridLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>

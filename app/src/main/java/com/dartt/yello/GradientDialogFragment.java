@@ -49,12 +49,13 @@ public class GradientDialogFragment extends DialogFragment {
 
     int currentColorButtonIndex = 0;
 
-    GradientDialogListener listener;
+    Listener listener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -232,7 +233,7 @@ public class GradientDialogFragment extends DialogFragment {
         newGradientImageView.setImageDrawable(Variables.newGradientDrawable(activity, gradient, currentOrientation, Variables.CORNER_DP));
     }
 
-    interface GradientDialogListener {
+    interface Listener {
         void onGradientSelected(int[] gradient, Orientation orientation);
     }
 

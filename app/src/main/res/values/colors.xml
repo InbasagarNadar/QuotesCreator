@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#CCCC</color>
     <color name="colorAccent">#FFBF00</color>
     <color name="sandal">#FFF8F0</color>
+    <color name="sandalDark">#FFECB3</color>
+    <color name="imageButtonTintEnabled">#E222</color>
+    <color name="imageButtonTintDisabled">#9222</color>
 </resources>

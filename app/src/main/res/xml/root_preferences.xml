@@ -1,0 +1,20 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:defaultValue="1080"
+        app:entries="@array/export_entries"
+        app:entryValues="@array/export_values"
+        app:icon="@drawable/ic_resolution"
+        app:key="export_resolution"
+        app:title="@string/preference_resolution"
+        app:useSimpleSummaryProvider="true" />
+    <ListPreference
+        app:defaultValue="png"
+        app:icon="@drawable/gallery_vector"
+        app:entries="@array/format_entries"
+        app:entryValues="@array/format_values"
+        app:key="export_format"
+        app:title="@string/preference_format"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>
