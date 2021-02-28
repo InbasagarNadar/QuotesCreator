@@ -156,16 +156,19 @@ public class EditorFragment extends Fragment {
 
     void setBackground(final Uri imageUri) {
         activity.undo.beforeEdit(backgroundViewContainer);
+        backgroundViewContainer.resetFilter();
         backgroundViewContainer.setImage(imageUri, onBackgroundChanged, true);
     }
 
     void setBackground(final int resourceId) {
         activity.undo.beforeEdit(backgroundViewContainer);
+        backgroundViewContainer.resetFilter();
         backgroundViewContainer.setImage(resourceId, onBackgroundChanged, true);
     }
 
     void setBackground(final String url) {
         activity.undo.beforeEdit(backgroundViewContainer);
+        backgroundViewContainer.resetFilter();
         backgroundViewContainer.setImage(url, onBackgroundChanged, true);
     }
 
@@ -278,6 +281,15 @@ public class EditorFragment extends Fragment {
             Log.e("EditorFragment", "Failed to save state. JSON exception: " + e.toString());
         }
     }
+
+
+    public void setContrastBrightnessSaturation(float contrast, float brightness, float saturation) {
+        backgroundViewContainer.setContrastBrightnessSaturation(contrast, brightness, saturation);
+    }
+
+    /*public void setSaturation(float saturation) {
+        backgroundViewContainer.setSaturation(saturation);
+    }*/
 
     class RatioUndoable implements Undo.Undoable {
         final String oldDimensionRatio;

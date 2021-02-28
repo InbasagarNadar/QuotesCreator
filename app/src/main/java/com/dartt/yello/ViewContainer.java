@@ -208,13 +208,17 @@ class StickerViewContainer extends ViewContainer {
 
 class ImageViewContainer extends ViewContainer {
 
-    static final int BACKGROUND_TYPE_NULL = 0;
-    static final int BACKGROUND_TYPE_RESOURCE_ID = 1;
-    static final int BACKGROUND_TYPE_URI = 2;
-    static final int BACKGROUND_TYPE_URL = 3;
+    public static final int BACKGROUND_TYPE_NULL = 0;
+    public static final int BACKGROUND_TYPE_RESOURCE_ID = 1;
+    public static final int BACKGROUND_TYPE_URI = 2;
+    public static final int BACKGROUND_TYPE_URL = 3;
 
     Bitmap imageBitmap;
-    Bitmap imageBitmapResized;
+    //Bitmap imageBitmapResized;
+
+    float contrast = GraphicsHelper.DEFAULT_CONTRAST;
+    float saturation = GraphicsHelper.DEFAULT_SATURATION;
+    float brightness = GraphicsHelper.DEFAULT_BRIGHTNESS;
 
     int currentBackgroundType = BACKGROUND_TYPE_NULL;
     int currentBackgroundResourceId;
@@ -265,6 +269,7 @@ class ImageViewContainer extends ViewContainer {
         this.callback = callback;
         currentBackgroundType = BACKGROUND_TYPE_URI;
         currentBackgroundUri = imageUri;
+        //resetFilter();
         Glide.with(getView()).load(imageUri).into(target);
     }
 
@@ -273,6 +278,7 @@ class ImageViewContainer extends ViewContainer {
         this.callback = callback;
         currentBackgroundType = BACKGROUND_TYPE_RESOURCE_ID;
         currentBackgroundResourceId = resourceId;
+        //resetFilter();
         Glide.with(getView()).load(resourceId).into(target);
     }
 
@@ -281,15 +287,34 @@ class ImageViewContainer extends ViewContainer {
         this.callback = callback;
         currentBackgroundType = BACKGROUND_TYPE_URL;
         currentBackgroundUrl = url;
+        //resetFilter();
         Glide.with(getView()).load(url).into(target);
     }
 
     void setDrawable(Drawable resource) {
-        ImageView imageView = getView();
+        //ImageView imageView = getView();
         imageBitmap = ((BitmapDrawable) resource).getBitmap();
-        imageBitmapResized = SaveActivity.getResizedBitmap(imageBitmap, 512);
-        imageView.setImageBitmap(imageBitmap);
+        setBitmapWithFilter(imageBitmap);
+        //imageBitmapResized = SaveActivity.getResizedBitmap(imageBitmap, 512);
+        //imageView.setImageBitmap(imageBitmap);
 
+    }
+
+    void resetFilter() {
+        contrast = GraphicsHelper.DEFAULT_CONTRAST;
+        brightness = GraphicsHelper.DEFAULT_BRIGHTNESS;
+        saturation = GraphicsHelper.DEFAULT_SATURATION;
+    }
+
+    void setContrastBrightnessSaturation(float contrast, float brightness, float saturation) {
+        this.contrast = contrast;
+        this.brightness = brightness;
+        this.saturation = saturation;
+        setBitmapWithFilter(imageBitmap);
+    }
+
+    void setBitmapWithFilter(Bitmap bitmap) {
+        getView().setImageBitmap(GraphicsHelper.changeBitmapContrastBrightnessSaturation(bitmap, contrast, brightness, saturation));
     }
 
     void fillParent() {
@@ -337,12 +362,18 @@ class ImageViewContainer extends ViewContainer {
                 background.put("background", currentBackgroundResourceId);
                 break;
         }
+        background.put("contrast", contrast);
+        background.put("brightness", brightness);
+        background.put("saturation", saturation);
         return background;
     }
 
     @Override
     public void copyAttrFromJSON(JSONObject jsonObject) throws JSONException {
         currentBackgroundType = jsonObject.getInt("type");
+        contrast = (float) jsonObject.getDouble("contrast");
+        brightness = (float) jsonObject.getDouble("brightness");
+        saturation = (float) jsonObject.getDouble("saturation");
         switch (currentBackgroundType) {
             case BACKGROUND_TYPE_URL:
                 setImage(jsonObject.getString("background"), null, false);
@@ -362,6 +393,7 @@ class ImageViewContainer extends ViewContainer {
     ImageView getView() {
         return (ImageView) view;
     }
+
 }
 
 

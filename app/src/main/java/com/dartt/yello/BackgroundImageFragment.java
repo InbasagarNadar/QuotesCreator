@@ -105,13 +105,23 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_BACKGROUND_IMAGE_REQUEST_CODE);
     }
 
+    public void resetState(ImageViewContainer viewContainer) {
+        if (viewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL) {
+            btnRemoveBackground.setVisibility(View.GONE);
+        }
+        else {
+            btnRemoveBackground.setVisibility(View.VISIBLE);
+        }
+    }
+
     @Override
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.btn_remove_background) {
             btnRemoveBackground.setVisibility(View.GONE);
             activity.onRemoveBackgroundClick(view);
-        } else if (id == R.id.button_show_internet_image_picker) {
+        }
+        else if (id == R.id.button_show_internet_image_picker) {
             Intent intent = new Intent(activity, ServerImagesActivity.class);
             startActivityForResult(intent, INTERNET_IMAGE_REQUEST_CODE);
         } else if (id == R.id.img_btn_gallery_background) {

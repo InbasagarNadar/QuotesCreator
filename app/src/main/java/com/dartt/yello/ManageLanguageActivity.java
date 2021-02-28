@@ -68,7 +68,8 @@ public class ManageLanguageActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
             if (position == 0) {
                 holder.txtLanguageName.setText(LanguageManager.languages[position].name);
-            } else {
+            }
+            else {
                 holder.txtLanguageName.setText(String.format("%s (%s)", LanguageManager.languages[position].name, LanguageManager.languages[position].locale));
             }
             if (position == 0) {
@@ -77,7 +78,8 @@ public class ManageLanguageActivity extends AppCompatActivity {
                 holder.btnDownload.setVisibility(View.GONE);
                 holder.btnDelete.setVisibility(View.VISIBLE);
                 holder.btnDelete.setEnabled(false);
-            } else {
+            }
+            else {
                 holder.cbxEnabled.setEnabled(true);
                 holder.btnDelete.setEnabled(true);
                 if (LanguageManager.languages[position].isDownloaded(context)) {
@@ -107,7 +109,8 @@ public class ManageLanguageActivity extends AppCompatActivity {
                             builder.show();
                         }
                     });
-                } else {
+                }
+                else {
                     holder.btnDelete.setVisibility(View.GONE);
                     holder.cbxEnabled.setVisibility(View.GONE);
                     holder.btnDownload.setVisibility(View.VISIBLE);
@@ -279,6 +282,7 @@ class LanguageManager {
         final static String Devanagari = "devanagari";
         final static String Tamil = "tamil";
         final static String Malayalam = "malayalam";
+        final static String Telugu = "telugu";
     }
 
     public static final int[] englishFontResourceId = {
@@ -391,7 +395,8 @@ class LanguageManager {
             },
             new Lang("Devanagari", "देवनागरी", Codes.Devanagari),
             new Lang("Tamil", "தமிழ்", Codes.Tamil),
-            new Lang("Malayalam", "മലയാളം", Codes.Malayalam)
+            new Lang("Malayalam", "മലയാളം", Codes.Malayalam),
+            new Lang("Telugu", "తెలుగు", Codes.Telugu)
     };
 
     static boolean isLanguageDownloaded(Context context, String code) {
@@ -406,6 +411,24 @@ class LanguageManager {
             return true;
         }
         return context.getSharedPreferences("lang", MODE_PRIVATE).getBoolean(code + "_active", false);
+    }
+
+    static String getLanguageCodeFromText(CharSequence charSequence) {
+        String languageCode = Codes.English;
+        Character.UnicodeBlock characterLanguage = Character.UnicodeBlock.of(charSequence.charAt(0));
+        if ((characterLanguage == Character.UnicodeBlock.DEVANAGARI_EXTENDED || characterLanguage == Character.UnicodeBlock.DEVANAGARI)) {
+            languageCode = Codes.Devanagari;
+        }
+        else if (characterLanguage == Character.UnicodeBlock.TAMIL) {
+            languageCode = Codes.Tamil;
+        }
+        else if (characterLanguage == Character.UnicodeBlock.MALAYALAM) {
+            languageCode = Codes.Malayalam;
+        }
+        else if (characterLanguage == Character.UnicodeBlock.TELUGU) {
+            languageCode = Codes.Telugu;
+        }
+        return languageCode;
     }
 
     static boolean isTypefaceAvailable(Context context, String code, String typefaceName) {
@@ -427,7 +450,8 @@ class LanguageManager {
                 }
             }
             return null;
-        } else {
+        }
+        else {
             return Typeface.createFromFile(context.getFilesDir() + "/fonts/" + languageCode + "/" + typefaceName);
         }
     }

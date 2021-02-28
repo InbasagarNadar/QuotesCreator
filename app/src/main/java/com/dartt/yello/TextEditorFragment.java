@@ -2,6 +2,7 @@ package com.dartt.yello;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -24,12 +25,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -63,6 +66,9 @@ public class TextEditorFragment extends Fragment {
     CustomColorPickerView fontColorPicker;
     ViewGroup fontColorPickerParent;
     ImageButton textAlignmentImageButton;
+
+    LinearLayout autoLanguageParent;
+    TextView autoLanguageText;
 
     SpanHelper boldSpan = new SpanHelper() {
         @Override
@@ -211,6 +217,8 @@ public class TextEditorFragment extends Fragment {
         fontPreviewText = fragment.findViewById(R.id.font_preview_text);
         typefacePanel = fragment.findViewById(R.id.font_typeface_panel);
         textAlignmentImageButton = fragment.findViewById(R.id.button_text_align);
+        autoLanguageParent = fragment.findViewById(R.id.auto_language_parent);
+        autoLanguageText = fragment.findViewById(R.id.auto_language_text);
 
         recyclerLanguage = fragment.findViewById(R.id.recycler_language);
         recyclerLanguage.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
@@ -319,18 +327,29 @@ public class TextEditorFragment extends Fragment {
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                if (charSequence.length() >= 4 || charSequence.length() < 1) {
+                    autoLanguageParent.setVisibility(View.GONE);
+                }
+                else {
+                    String textLanguageCode = LanguageManager.getLanguageCodeFromText(charSequence);
+                    if (!languageAdapter.activeLanguages[languageAdapter.currentLanguageIndex].code.equals(textLanguageCode)) {
+                        autoLanguageText.setText(String.format("Switch to %s%s?", textLanguageCode.substring(0, 1).toUpperCase(), textLanguageCode.substring(1)));
+                        autoLanguageParent.setVisibility(View.VISIBLE);
+                    }
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.toString().length() == 0) {
                     editText.setHint("Type...");
-                } else {
+                }
+                else {
                     editText.setHint("");
                 }
 
@@ -429,8 +448,25 @@ public class TextEditorFragment extends Fragment {
             }
         });
 
+        fragment.findViewById(R.id.auto_language_accept).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                languageAdapter.setCurrentLanguage(LanguageManager.getLanguageCodeFromText(editText.getText()));
+                currentEditorFont = typefaceAdapter.fonts[0];
+                autoLanguageParent.setVisibility(View.GONE);
+            }
+        });
+
+        fragment.findViewById(R.id.auto_language_dismiss).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                autoLanguageParent.setVisibility(View.GONE);
+            }
+        });
+
         return fragment;
     }
+
 
     @Override
     public void onResume() {
@@ -493,10 +529,12 @@ public class TextEditorFragment extends Fragment {
                     activeTextViewContainer.fontHolder = currentEditorFont;
                     activity.undo.onElementAdded(activeTextViewContainer);
                 }
-            } else {
+            }
+            else {
                 if (text.equals("")) {
                     activity.removeElement(activeTextViewContainer);
-                } else {
+                }
+                else {
                     activity.undo.beforeEdit(activeTextViewContainer);
                     activeTextViewContainer.updateContent(editText);
                     //activeTextViewContainer.fontIndex = fontIndex;
@@ -579,7 +617,8 @@ public class TextEditorFragment extends Fragment {
     public void toggleFontOptionGrid() {
         if (fontOptionGrid.getVisibility() == View.VISIBLE) {
             fontOptionGrid.setVisibility(View.GONE);
-        } else {
+        }
+        else {
             fontColorPickerParent.setVisibility(View.GONE);
             fontOptionGrid.setVisibility(View.VISIBLE);
         }
@@ -588,7 +627,8 @@ public class TextEditorFragment extends Fragment {
     public void toggleFontColorPanel() {
         if (fontColorPickerParent.getVisibility() == View.VISIBLE) {
             fontColorPickerParent.setVisibility(View.GONE);
-        } else {
+        }
+        else {
             fontColorPickerParent.setVisibility(View.VISIBLE);
             fontOptionGrid.setVisibility(View.GONE);
             inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
@@ -618,16 +658,19 @@ public class TextEditorFragment extends Fragment {
                 if (spanStart >= selectionStart && spanEnd <= selectionEnd) {
                     //Inside Selection
                     spannable.removeSpan(styleSpan);
-                } else if (spanStart < selectionStart && spanEnd > selectionEnd) {
+                }
+                else if (spanStart < selectionStart && spanEnd > selectionEnd) {
                     //Span longer than selection
                     spannable.removeSpan(styleSpan);
                     spannable.setSpan(styleSpan, spanStart, selectionStart, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     spannable.setSpan(spanHelper.getNewSpan(), selectionEnd, spanEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-                } else if (spanEnd > selectionStart && spanEnd <= selectionEnd) {
+                }
+                else if (spanEnd > selectionStart && spanEnd <= selectionEnd) {
                     //Left Side
                     spannable.setSpan(styleSpan, spanStart, selectionStart, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                } else {
+                }
+                else {
                     //Right Side
                     spannable.setSpan(styleSpan, selectionEnd, spanEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 }
@@ -658,16 +701,19 @@ public class TextEditorFragment extends Fragment {
                 if (spanStart >= selectionStart && spanEnd <= selectionEnd) {
                     //Inside Selection
                     spannable.removeSpan(styleSpan);
-                } else if (spanStart < selectionStart && spanEnd > selectionEnd) {
+                }
+                else if (spanStart < selectionStart && spanEnd > selectionEnd) {
                     //Span longer than selection
                     spannable.removeSpan(styleSpan);
                     spannable.setSpan(styleSpan, spanStart, selectionStart, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     spannable.setSpan(spanHelper.clone(styleSpan), selectionEnd, spanEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-                } else if (spanEnd > selectionStart && spanEnd <= selectionEnd) {
+                }
+                else if (spanEnd > selectionStart && spanEnd <= selectionEnd) {
                     //Left Side
                     spannable.setSpan(styleSpan, spanStart, selectionStart, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                } else {
+                }
+                else {
                     //Right Side
                     spannable.setSpan(styleSpan, selectionEnd, spanEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 }
@@ -692,6 +738,7 @@ public class TextEditorFragment extends Fragment {
     public void hideTypefacePanel() {
         typefacePanel.setVisibility(View.GONE);
     }
+
 
     abstract static class SpanHelper {
         abstract boolean match(CharacterStyle span);
@@ -758,7 +805,7 @@ public class TextEditorFragment extends Fragment {
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (currentFontIndex >= -0) {
+                        if (currentFontIndex >= 0) {
                             notifyItemChanged(currentFontIndex);
                         }
                         currentFontIndex = position;
@@ -770,7 +817,8 @@ public class TextEditorFragment extends Fragment {
             }
             if (currentFontIndex == position) {
                 view.setTextColor(0xFFFFBF00);
-            } else {
+            }
+            else {
                 view.setTextColor(0xFF000000);
             }
         }
@@ -835,9 +883,18 @@ public class TextEditorFragment extends Fragment {
                     notifyItemChanged(oldPosition);
                     notifyItemChanged(i);
                     languageSelectedListener.onLanguageSelected(lang);
-                    break;
+                    return;
                 }
             }
+            AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                    .setMessage("You haven't downloaded the language yet. Do you want to download it now?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            context.startActivity(new Intent(context, ManageLanguageActivity.class));
+                        }
+                    })
+                    .setNegativeButton("No", null);
+            builder.show();
         }
 
         @NonNull
@@ -863,7 +920,8 @@ public class TextEditorFragment extends Fragment {
                         }
                     }
                 });
-            } else {
+            }
+            else {
                 holder.lblLanguageName.setText("  +  ");
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -874,7 +932,8 @@ public class TextEditorFragment extends Fragment {
             }
             if (currentLanguageIndex == position) {
                 holder.lblLanguageName.setTextColor(0xFFFFBF00);
-            } else {
+            }
+            else {
                 holder.lblLanguageName.setTextColor(0xFF000000);
             }
 

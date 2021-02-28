@@ -1,6 +1,7 @@
 package com.dartt.yello;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,24 +9,19 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-
-import com.zomato.photofilters.imageprocessors.Filter;
-import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
-import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
-import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
 import java.util.Locale;
 
 public class FilterFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
 
-    Filter imageFilter = new Filter();
-    SaturationSubfilter saturationSubFilter = new SaturationSubfilter(1); // [0 - 3]
-    ContrastSubFilter contrastSubFilter = new ContrastSubFilter(1); //[.25 - 2.5]
-    BrightnessSubFilter brightnessSubFilter = new BrightnessSubFilter(0); //[-100, 100]
 
-    FilterListener listener;
+    CreateBackgroundActivity activity;
+
+//    FilterListener listener;
 
     SeekBar contrastSeekBar;
     SeekBar brightnessSeekBar;
@@ -40,22 +36,26 @@ public class FilterFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     public FilterFragment() {
     }
-
+/*
     public static FilterFragment newInstance(FilterListener listener) {
         FilterFragment fragment = new FilterFragment();
         fragment.listener = listener;
         return fragment;
     }
+*/
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(null);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setRetainInstance(false);
         View view = inflater.inflate(R.layout.fragment_filter, container, false);
-        imageFilter.addSubFilter(contrastSubFilter);
-        imageFilter.addSubFilter(saturationSubFilter);
-        imageFilter.addSubFilter(brightnessSubFilter);
-
+        activity = (CreateBackgroundActivity) getActivity();
+        Log.e("TEST", "FILTER CREATE VIEW");
         contrastSeekBar = view.findViewById(R.id.contrast_seekbar);
         brightnessSeekBar = view.findViewById(R.id.brightness_seekbar);
         saturationSeekBar = view.findViewById(R.id.saturation_seekbar);
@@ -90,42 +90,56 @@ public class FilterFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         contrastSeekBar.setProgress(75);
         brightnessSeekBar.setProgress(100);
         saturationSeekBar.setProgress(50);
-        contrastSubFilter.setContrast(1);
-        saturationSubFilter.setLevel(1);
-        brightnessSubFilter.setBrightness(0);
+    }
+
+    public void resetFilter(ImageViewContainer viewContainer) {
+        contrastSeekBar.setProgress((int) ((viewContainer.contrast - .25) * 100));
+        brightnessSeekBar.setProgress((int) (viewContainer.brightness + 100));
+        saturationSeekBar.setProgress((int) (viewContainer.saturation * 50));
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        contrastSeekBar = view.findViewById(R.id.contrast_seekbar);
+        brightnessSeekBar = view.findViewById(R.id.brightness_seekbar);
+        saturationSeekBar = view.findViewById(R.id.saturation_seekbar);
+        contrastTextView = view.findViewById(R.id.contrast_text);
+        brightnessTextView = view.findViewById(R.id.brightness_text);
+        saturationTextView = view.findViewById(R.id.saturation_text);
+
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (seekBar.equals(contrastSeekBar)) {
-            float contrast = .25f + i / 100f;
-            contrastSubFilter.setContrast(contrast);
-            contrastTextView.setText(String.format(Locale.ENGLISH, "%.2f", contrast));
-        } else if (seekBar.equals(brightnessSeekBar)) {
-            int brightness = i - 100;
-            brightnessSubFilter.setBrightness(brightness);
-            brightnessTextView.setText(String.format(Locale.ENGLISH, "%d", brightness));
-        } else {
-            float saturation;
-            if (i <= 50) {
-                saturation = i * .02f;
-            } else {
-                saturation = 1 + (i - 50) * .04f;
-            }
-            saturationSubFilter.setLevel(saturation);
-            saturationTextView.setText(String.format(Locale.ENGLISH, "%.2f", saturation));
+
+        float contrast = .25f + contrastSeekBar.getProgress() / 100f;
+        float saturation = saturationSeekBar.getProgress() * .02f;
+        int brightness = brightnessSeekBar.getProgress() - 100;
+        contrastTextView.setText(String.format(Locale.ENGLISH, "%.2f", contrast));
+        brightnessTextView.setText(String.format(Locale.ENGLISH, "%d", brightness));
+        saturationTextView.setText(String.format(Locale.ENGLISH, "%.2f", saturation));
+        if (b) {
+            activity.setContrastBrightnessSaturation(contrast, brightness, saturation);
         }
-        listener.onFilterChange(imageFilter);
+        /*if (i <= 50) {
+            saturation = i * .02f;
+        } else {
+            saturation = 1 + (i - 50) * .04f;
+        }
+        saturationSubFilter.setLevel(saturation);
+        saturationTextView.setText(String.format(Locale.ENGLISH, "%.2f", saturation));*/
+
     }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-
+        activity.beforeFilterChange();
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        listener.onEditComplete(imageFilter);
+        activity.afterFilterChange();
     }
 
     @Override
@@ -141,10 +155,10 @@ public class FilterFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
-    interface FilterListener {
+    /*interface FilterListener {
         void onFilterChange(Filter filter);
 
         void onEditComplete(Filter filter);
-    }
+    }*/
 
 }
