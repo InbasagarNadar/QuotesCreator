@@ -264,6 +264,9 @@ public class SaveActivity extends AppCompatActivity {
                                             if (!watermarkRemoved) {
                                                 initWatermarkRewardedAd();
                                             }
+                                            watermarkRemoved = true;
+                                            watermarkImageButton.setVisibility(View.GONE);
+                                            savedPath = null;
                                         }
                                     });
                                 } else {
@@ -271,9 +274,16 @@ public class SaveActivity extends AppCompatActivity {
                                     if (!watermarkRewardedAd.isLoaded()) {
                                         initWatermarkRewardedAd();
                                     }
+                                    watermarkRemoved = true;
+                                    watermarkImageButton.setVisibility(View.GONE);
+                                    savedPath = null;
+
                                 }
                             } catch (Exception e) {
                                 Log.e("ADMOB", e.toString());
+                                watermarkRemoved = true;
+                                watermarkImageButton.setVisibility(View.GONE);
+                                savedPath = null;
                             }
                         }
                     })

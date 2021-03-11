@@ -122,7 +122,8 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             activity.onRemoveBackgroundClick(view);
         }
         else if (id == R.id.button_show_internet_image_picker) {
-            Intent intent = new Intent(activity, ServerImagesActivity.class);
+            // Intent intent = new Intent(activity, ServerImagesActivity.class);
+            Intent intent = new Intent(activity, ImageSearchActivity.class);
             startActivityForResult(intent, INTERNET_IMAGE_REQUEST_CODE);
         } else if (id == R.id.img_btn_gallery_background) {
             if (StorageHelper.hasStoragePermission(activity)) {

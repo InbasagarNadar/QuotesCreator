@@ -203,7 +203,7 @@ public class TextEditorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         activity = (CreateBackgroundActivity) getActivity();
         inputManager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
-        View fragment = inflater.inflate(R.layout.fragment_text_editor, container, false);
+        final View fragment = inflater.inflate(R.layout.fragment_text_editor, container, false);
         parent = fragment.findViewById(R.id.parent);
         editText = fragment.findViewById(R.id.edit_text_input);
         editTextScrollView = fragment.findViewById(R.id.edit_text_scroll_view);
@@ -444,7 +444,13 @@ public class TextEditorFragment extends Fragment {
         fragment.findViewById(R.id.button_text_show_typeface).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showTypefacePanel();
+                if (typefacePanel.getVisibility() == View.GONE) {
+                    showTypefacePanel();
+                }
+                else {
+                    setEditorTypeface(oldEditorFont);
+                    show();
+                }
             }
         });
 
@@ -452,7 +458,7 @@ public class TextEditorFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 languageAdapter.setCurrentLanguage(LanguageManager.getLanguageCodeFromText(editText.getText()));
-                currentEditorFont = typefaceAdapter.fonts[0];
+                setEditorTypeface(typefaceAdapter.fonts[0]);
                 autoLanguageParent.setVisibility(View.GONE);
             }
         });

@@ -58,7 +58,7 @@ public class ServerImageDialogFragment extends DialogFragment {
                     }
                     dismiss();
                 } else {
-                    Toast.makeText(getContext(), "Please let the image downloadZipAsync finish.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Please let the image download finish.", Toast.LENGTH_SHORT).show();
                 }
             }
         });

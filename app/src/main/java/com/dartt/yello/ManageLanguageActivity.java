@@ -2,6 +2,7 @@ package com.dartt.yello;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,6 +49,11 @@ public class ManageLanguageActivity extends AppCompatActivity {
         finish();
     }
 
+    public void onManageSystemLanguageClick(View view) {
+        Intent intent = new Intent();
+        intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");
+        startActivity(intent);
+    }
 
     class LanguageRecyclerAdapter extends RecyclerView.Adapter<LanguageRecyclerAdapter.ViewHolder> {
         Context context;

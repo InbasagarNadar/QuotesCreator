@@ -36,5 +36,16 @@
         android:id="@+id/recycler_language"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp" />
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp" />
+
+    <Button
+        android:paddingStart="10dp"
+        android:text="Manage System Language"
+        android:onClick="onManageSystemLanguageClick"
+        android:drawableStart="@drawable/ic_settings_vector"
+        android:background="?attr/selectableItemBackground"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

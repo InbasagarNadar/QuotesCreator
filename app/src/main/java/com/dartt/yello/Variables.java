@@ -129,4 +129,5 @@ public class Variables {
         gradientDrawable.setCornerRadius(Variables.densityToPixel(context, dp));
         return gradientDrawable;
     }
+
 }
