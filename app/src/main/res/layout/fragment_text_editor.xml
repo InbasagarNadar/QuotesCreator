@@ -1,63 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/parent"
-    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="50dp"
-    android:background="#7000"
+    android:animateLayoutChanges="true"
+    android:background="#cffe"
     android:clickable="true"
     android:visibility="gone"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".TextEditorFragment">
 
+    <androidx.gridlayout.widget.GridLayout
+        android:id="@+id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#ffe"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ImageButton
-        android:id="@+id/button_commit"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_margin="10dp"
-        android:background="@null"
-        android:tint="#fff"
-        android:contentDescription="Confirm"
-        android:src="@drawable/icon_check_vector"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/button_cancel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:contentDescription="Cancel"
+            android:src="@drawable/icon_clear_vector"
+            android:textColor="@android:color/white"
+            android:tint="#000"
+            app:layout_columnWeight="1" />
 
-    <ImageButton
-        android:id="@+id/button_cancel"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_margin="10dp"
-        android:background="@null"
-        android:contentDescription="Cancel"
-        android:src="@drawable/icon_clear_vector"
-        android:tint="#fff"
-        android:textColor="@android:color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/button_toggle_background"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:src="@drawable/ic_baseline_brightness_medium_24"
+            app:layout_columnWeight="1" />
 
-    <ImageButton
-        android:id="@+id/button_delete_text"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_margin="10dp"
-        android:background="@null"
-        android:contentDescription="Delete"
-        android:src="@drawable/trash_can_vector"
-        android:tint="#F32013"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/button_delete_text"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:contentDescription="Delete"
+            android:src="@drawable/trash_can_vector"
+            android:tint="#F32013"
+            app:layout_columnWeight="1" />
+
+        <ImageButton
+            android:id="@+id/button_commit"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:contentDescription="Confirm"
+            android:src="@drawable/icon_check_vector"
+            android:tint="#000"
+            app:layout_columnWeight="1" />
+    </androidx.gridlayout.widget.GridLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="15dp"
-
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
         app:layout_constraintBottom_toTopOf="@id/_text_extra_panel"
-        app:layout_constraintTop_toTopOf="@id/button_commit">
+        app:layout_constraintTop_toBottomOf="@id/topPanel">
 
         <ScrollView
             android:id="@+id/edit_text_scroll_view"
@@ -72,13 +80,13 @@
                 android:id="@+id/edit_text_input"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@null"
+                android:background="#00000000"
                 android:gravity="center"
-                android:overScrollMode="never"
                 android:hint="Type..."
                 android:inputType="textMultiLine|textCapSentences"
-                android:textColor="#fff"
-                android:textColorHint="#fff" />
+                android:overScrollMode="never"
+                android:textColor="#000"
+                android:textColorHint="#000" />
         </ScrollView>
     </FrameLayout>
 
@@ -116,32 +124,31 @@
                 android:id="@+id/recycler_language"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-
                 android:layout_marginEnd="80dp"
                 android:padding="8dp"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/font_typeface_cancel"
-                app:layout_constraintStart_toEndOf="@+id/font_preview_text"
                 android:layout_width="40dp"
-                android:tint="#000"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_height="match_parent"
                 android:background="#0000"
                 android:src="@drawable/icon_clear_vector"
-                android:layout_height="match_parent" />
+                android:tint="#000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/font_preview_text"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/font_typeface_confirm"
-                android:tint="#000"
-                app:layout_constraintStart_toEndOf="@+id/font_typeface_cancel"
                 android:layout_width="40dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_height="match_parent"
                 android:background="#0000"
                 android:src="@drawable/icon_check_vector"
-                android:layout_height="match_parent" />
+                android:tint="#000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/font_typeface_cancel"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -157,43 +164,43 @@
         android:id="@+id/auto_language_parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="@id/parent"
-        app:layout_constraintRight_toRightOf="@id/parent"
-        app:layout_constraintBottom_toTopOf="@id/textEditorOptions"
         android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/sandal"
-        android:visibility="gone"
         android:background="@drawable/shape_capsule"
-        android:orientation="horizontal">
+        android:backgroundTint="@color/sandal"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/textEditorOptions"
+        app:layout_constraintLeft_toLeftOf="@id/parent"
+        app:layout_constraintRight_toRightOf="@id/parent">
 
         <TextView
             android:id="@+id/auto_language_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textSize="16dp"
-            android:textColor="#000"
             android:paddingStart="10dp"
-            android:text="Switch to Tamil?" />
+            android:text="Switch to Tamil?"
+            android:textColor="#000"
+            android:textSize="16dp" />
 
         <ImageButton
             android:id="@+id/auto_language_accept"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginStart="10dp"
-            android:tint="#000"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/icon_check_vector" />
+            android:src="@drawable/icon_check_vector"
+            android:tint="#000" />
 
         <ImageButton
             android:id="@+id/auto_language_dismiss"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginStart="10dp"
-            android:paddingEnd="10dp"
-            android:tint="#000"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/icon_clear_vector" />
+            android:paddingEnd="10dp"
+            android:src="@drawable/icon_clear_vector"
+            android:tint="#000" />
     </LinearLayout>
 
     <androidx.gridlayout.widget.GridLayout
@@ -286,10 +293,21 @@
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackground"
             android:contentDescription="Text Color"
-
             android:padding="8dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/gradient"
+            android:src="@drawable/ic_baseline_format_color_text_24"
+            app:layout_columnWeight="1" />
+
+        <ImageButton
+            android:id="@+id/button_toggle_text_highlight_color_picker"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Text Highlight"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_baseline_font_download_24"
+            android:tint="#d00"
             app:layout_columnWeight="1" />
     </androidx.gridlayout.widget.GridLayout>
 
@@ -302,24 +320,94 @@
         android:layout_marginBottom="5dp"
         app:layout_constraintBottom_toTopOf="@id/textEditorOptions">
 
-        <FrameLayout
-            android:id="@+id/font_color_picker_parent"
-            android:layout_width="200dp"
-            android:layout_height="180dp"
-            android:background="@drawable/shape_rounded_corner"
-            android:backgroundTint="#FFF5F8DE"
-            android:padding="2dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintTextBackgroundPickerParent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <com.dartt.yello.views.CustomColorPickerView
-                android:id="@+id/font_color_picker"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:hueSliderSpacing="5dp"
-                app:hueSliderWidth="15dp" />
-        </FrameLayout>
+            <ToggleButton
+                android:id="@+id/toggleCustomTextHighlightColor"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/checkbox_eyedropper_palette"
+                android:checked="true"
+                android:elevation="2dp"
+                android:textOff=""
+                android:textOn=""
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <ImageButton
+                android:id="@+id/imageButtonTextHighlightOpacity"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_margin="4dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/shape_rounded_corner"
+                android:elevation="2dp"
+                android:src="@drawable/ic_outline_font_download_24"
+                android:tint="#000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/toggleCustomTextHighlightColor" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintTextHighlightListParent"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="3dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/imageButtonTextHighlightOpacity">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerTextHighlightColor"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:listitem="@layout/item_color_row" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintTextHighlightCustomPickerParent"
+                android:layout_width="0dp"
+                android:layout_height="180dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/toggleCustomTextHighlightColor">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerRecentHighlightColors"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toStartOf="@id/highlightPickerFrame"
+                    tools:listitem="@layout/item_color_row" />
+
+                <FrameLayout
+                    android:id="@+id/highlightPickerFrame"
+                    android:layout_width="200dp"
+                    android:layout_height="180dp"
+                    android:background="@drawable/shape_rounded_corner"
+                    android:backgroundTint="#FFF5F8DE"
+                    android:padding="2dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.dartt.yello.views.CustomColorPickerView
+                        android:id="@+id/font_background_color_picker"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:hueSliderSpacing="5dp"
+                        app:hueSliderWidth="15dp" />
+                </FrameLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <androidx.gridlayout.widget.GridLayout
             android:id="@+id/font_options_grid"

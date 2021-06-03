@@ -1,8 +1,15 @@
 package com.dartt.yello;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.util.SparseArray;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -211,12 +218,14 @@ abstract class Downloader implements Runnable {
                     httpsURLConnection.setRequestProperty("Range", "bytes=" + cachedFileSize + "-" + serverFileSize);
                     fileOutputStream = new FileOutputStream(cachedFile, true);
                     onDownloadProgressed(cachedFileSize);
-                } else {
+                }
+                else {
                     setLastModified(serverLastModified);
                     fileOutputStream = new FileOutputStream(cachedFile);
                 }
 
-            } else {
+            }
+            else {
                 setLastModified(serverLastModified);
                 cachedFile.createNewFile();
                 fileOutputStream = new FileOutputStream(cachedFile);
@@ -259,11 +268,13 @@ abstract class Downloader implements Runnable {
                     Log.e(LOG_TAG, errorMessage);
                     onDownloadFailed(errorMessage);
                 }
-            } else if (responseCode == 404) {
+            }
+            else if (responseCode == 404) {
                 String errorMessage = "File not found on server: " + responseCode;
                 Log.e(LOG_TAG, errorMessage);
                 onDownloadFailed(errorMessage);
-            } else {
+            }
+            else {
                 String errorMessage = "Unexpected response code from server: " + responseCode;
                 Log.e(LOG_TAG, errorMessage);
                 onDownloadFailed(errorMessage);
@@ -357,7 +368,8 @@ class CustomDownloadManager {
                             CustomDownloadManager.this.onDownloadFailed(errorMessage, true);
                         }
                     });
-                } else {
+                }
+                else {
                     mainThread.post(new Runnable() {
                         @Override
                         public void run() {
@@ -459,7 +471,8 @@ abstract class Undo {
                 e.printStackTrace();
                 Log.e(TAG, "Error occurred while recording new state: " + e.toString());
             }
-        } else {
+        }
+        else {
             activeViewContainer = null;
             Log.d(TAG, "Object Mismatch");
         }
@@ -538,4 +551,74 @@ abstract class Undo {
 
 interface CustomItemSelectListener {
     void onItemSelected(int position);
+}
+
+class CustomHtml {
+    public static String toHtml(Spannable text) {
+        final SpannableStringBuilder ssBuilder = new SpannableStringBuilder(text);
+        int start, end;
+
+        // Replace Style spans with <b></b> or <i></i>
+        StyleSpan[] styleSpans = ssBuilder.getSpans(0, text.length(), StyleSpan.class);
+        for (int i = styleSpans.length - 1; i >= 0; i--) {
+            StyleSpan span = styleSpans[i];
+            start = ssBuilder.getSpanStart(span);
+            end = ssBuilder.getSpanEnd(span);
+            ssBuilder.removeSpan(span);
+            if (span.getStyle() == Typeface.BOLD) {
+                ssBuilder.insert(start, "<b>");
+                ssBuilder.insert(end + 3, "</b>");
+            }
+            else if (span.getStyle() == Typeface.ITALIC) {
+                ssBuilder.insert(start, "<i>");
+                ssBuilder.insert(end + 3, "</i>");
+            }
+        }
+
+        // Replace underline spans with <u></u>
+        UnderlineSpan[] underSpans = ssBuilder.getSpans(0, ssBuilder.length(), UnderlineSpan.class);
+        for (int i = underSpans.length - 1; i >= 0; i--) {
+            UnderlineSpan span = underSpans[i];
+            start = ssBuilder.getSpanStart(span);
+            end = ssBuilder.getSpanEnd(span);
+            ssBuilder.removeSpan(span);
+            ssBuilder.insert(start, "<u>");
+            ssBuilder.insert(end + 3, "</u>");
+        }
+
+        ForegroundColorSpan[] foregroundSpans = ssBuilder.getSpans(0, ssBuilder.length(), ForegroundColorSpan.class);
+        SparseArray<String> strings = new SparseArray<>();
+        for (int i = foregroundSpans.length - 1; i >= 0; i--) {
+            ForegroundColorSpan span = foregroundSpans[i];
+            start = ssBuilder.getSpanStart(span);
+            end = ssBuilder.getSpanEnd(span);
+            ssBuilder.removeSpan(span);
+            String colorCode = Integer.toHexString(span.getForegroundColor()).substring(2);
+            String spanBegin = String.format("<span style=\"color:#%s;\">", colorCode);
+            strings.append(start, spanBegin + ssBuilder.subSequence(start, end) + "</span>");
+        }
+
+        StringBuilder finalString = new StringBuilder();
+        while (strings.size() > 0) {
+            int min = strings.keyAt(0);
+            for (int i = 0; i < strings.size(); i++) {
+                if (strings.keyAt(i) < min) {
+                    min = strings.keyAt(i);
+                }
+            }
+            finalString.append(strings.get(min));
+            strings.remove(min);
+        }
+        replace(finalString, '\n', "<br/>");
+
+        return finalString.toString();
+    }
+
+    private static void replace(StringBuilder b, char oldChar, String newStr) {
+        for (int i = b.length() - 1; i >= 0; i--) {
+            if (b.charAt(i) == oldChar) {
+                b.replace(i, i + 1, newStr);
+            }
+        }
+    }
 }

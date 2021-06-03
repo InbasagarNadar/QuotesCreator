@@ -147,6 +147,7 @@ public class FilterFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         for (int i = 0; i < 3; i++) {
             if (view == buttons[i]) {
                 seekBarParents[i].setVisibility(View.VISIBLE);
+
                 buttons[i].setColorFilter(getResources().getColor(R.color.colorAccent));
             } else {
                 seekBarParents[i].setVisibility(View.GONE);

@@ -24,7 +24,9 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
         tools:replace="android:supportsRtl">
-        <activity android:name=".ImageSearchActivity"></activity>
+        <activity
+            android:name=".ImageSearchActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ManageLanguageActivity"
             android:screenOrientation="portrait" />

@@ -8,6 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class EditorFragment extends Fragment {
 
@@ -88,7 +92,8 @@ public class EditorFragment extends Fragment {
                 touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
                 if (savedInstanceState != null) {
                     fromJSON(savedInstanceState.getString("json"));
-                } else {
+                }
+                else {
                     /* Checking if image exists in intent, else setting default image*/
                     Intent intent = activity.getIntent();
                     String action = intent.getAction();
@@ -102,10 +107,25 @@ public class EditorFragment extends Fragment {
                         }
                     }
                     if (backgroundViewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL) {
-                        backgroundViewContainer.setImage(Variables.BackgroundImages[0], null, true);
-                    } else {
+                        // Uncomment this to have default image on startup
+                        //backgroundViewContainer.setImage(Variables.BackgroundImages[0], null, true);
+                    }
+                    else {
                         backgroundViewContainer.fillParent();
                     }
+
+                    final TextViewContainer tv = new TextViewContainer(EditorFragment.this);
+                    tv.textContentOriginal = new SpannableStringBuilder(Variables.randomQuotes[new Random().nextInt(Variables.randomQuotes.length)]);
+                    tv.textContentOriginal.setSpan(new ForegroundColorSpan(0xFF000000), 0, tv.textContentOriginal.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    tv.getView().setText(tv.textContentOriginal);
+                    addElement(tv);
+                    tv.setDimension(new Vector2D(frameArtBoard.getWidth(), frameArtBoard.getHeight()), false);
+                    tv.getView().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tv.setText(tv.getView());
+                        }
+                    });
                 }
             }
 
@@ -130,23 +150,69 @@ public class EditorFragment extends Fragment {
     }
 
     void setArtBoardFill(int color) {
-        //activity.undo.beforeEdit(artBoardViewContainer);
         artBoardViewContainer.setArtBoardFill(color);
-        //activity.undo.afterEdit(artBoardViewContainer);
-        /*Variables.currentColor = color;
-        frameArtBoard.setBackgroundColor(color);*/
     }
 
     void setArtBoardFill(int[] gradient, GradientDrawable.Orientation orientation) {
-        //activity.undo.beforeEdit(artBoardViewContainer);
         artBoardViewContainer.setArtBoardFill(gradient, orientation);
-        //activity.undo.afterEdit(artBoardViewContainer);
-        /*Variables.currentGradient = gradient;
-        Variables.currentGradientOrientation = orientation;
-        GradientDrawable gradientDrawable = Variables.newGradientDrawable(activity, gradient, orientation, 0);
-        frameArtBoard.setBackground(gradientDrawable);*/
     }
 
+    boolean isArtBoardVisible() {
+        if (backgroundViewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL) {
+            return true;
+        }
+        else {
+            //Log.d("ArtBoard", artBoardViewContainer.width + " "+ artBoardViewContainer.height);
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) backgroundViewContainer.getView().getLayoutParams();
+            float pivotX = layoutParams.width / 2f + layoutParams.leftMargin;
+            float pivotY = layoutParams.height / 2f + layoutParams.topMargin;
+            double radians = Math.toRadians(backgroundViewContainer.getView().getRotation());
+            double sinTheta = Math.sin(radians);
+            double cosTheta = Math.cos(radians);
+            Vector2D a = new Vector2D(
+                    (float) (cosTheta * (layoutParams.leftMargin - pivotX) - sinTheta * (layoutParams.topMargin - pivotY) + pivotX),
+                    (float) (sinTheta * (layoutParams.leftMargin - pivotX) + cosTheta * (layoutParams.topMargin - pivotY) + pivotY)
+            );
+            Vector2D b = new Vector2D(
+                    (float) (cosTheta * (layoutParams.leftMargin - pivotX + layoutParams.width) - sinTheta * (layoutParams.topMargin - pivotY) + pivotX),
+                    (float) (sinTheta * (layoutParams.leftMargin - pivotX + layoutParams.width) + cosTheta * (layoutParams.topMargin - pivotY) + pivotY)
+            );
+            Vector2D c = new Vector2D(
+                    (float) (cosTheta * (layoutParams.leftMargin - pivotX + layoutParams.width) - sinTheta * (layoutParams.topMargin - pivotY + layoutParams.height) + pivotX),
+                    (float) (sinTheta * (layoutParams.leftMargin - pivotX + layoutParams.width) + cosTheta * (layoutParams.topMargin - pivotY + layoutParams.height) + pivotY)
+            );
+            Vector2D d = new Vector2D(
+                    (float) (cosTheta * (layoutParams.leftMargin - pivotX) - sinTheta * (layoutParams.topMargin - pivotY + layoutParams.height) + pivotX),
+                    (float) (sinTheta * (layoutParams.leftMargin - pivotX) + cosTheta * (layoutParams.topMargin - pivotY + layoutParams.height) + pivotY)
+            );
+
+            Vector2D[] frameCoordinates = new Vector2D[]{
+                    new Vector2D(0, 0),
+                    new Vector2D(frameArtBoard.getWidth(), 0),
+                    new Vector2D(frameArtBoard.getWidth(), frameArtBoard.getHeight()),
+                    new Vector2D(0, frameArtBoard.getHeight())
+            };
+
+            float rectArea = Math.abs((a.x * b.y - a.y * b.x) + (b.x * c.y - b.y * c.x) + (c.x * d.y - c.y * d.x) + (d.x * a.y - d.y * a.x)) / 2f;
+
+            for (Vector2D frameCoordinate : frameCoordinates) {
+                float pointArea = 0;
+                pointArea += Math.abs(frameCoordinate.x * (a.y - b.y) + a.x * (b.y - frameCoordinate.y) + b.x * (frameCoordinate.y - a.y)) / 2f;
+                pointArea += Math.abs(frameCoordinate.x * (b.y - c.y) + b.x * (c.y - frameCoordinate.y) + c.x * (frameCoordinate.y - b.y)) / 2f;
+                pointArea += Math.abs(frameCoordinate.x * (c.y - d.y) + c.x * (d.y - frameCoordinate.y) + d.x * (frameCoordinate.y - c.y)) / 2f;
+                pointArea += Math.abs(frameCoordinate.x * (d.y - a.y) + d.x * (a.y - frameCoordinate.y) + a.x * (frameCoordinate.y - d.y)) / 2f;
+                if (pointArea > rectArea + 5) {
+                    return true;
+                }
+            }
+            return false;
+            /*boolean leftSideVisible = layoutParams.leftMargin > 0;
+            boolean rightSideVisible = (layoutParams.leftMargin + layoutParams.width) < artBoardViewContainer.view.getWidth();
+            boolean topSideVisible = layoutParams.topMargin > 0;
+            boolean bottomSideVisible = (layoutParams.topMargin + layoutParams.height) < artBoardViewContainer.view.getHeight();
+            return leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible;*/
+        }
+    }
 
     void removeBackground() {
         activity.undo.beforeEdit(backgroundViewContainer);
@@ -245,7 +311,8 @@ public class EditorFragment extends Fragment {
                 ViewContainer viewContainer;
                 if (elements.getJSONObject(i).getString("type").equals("sticker")) {
                     viewContainer = new StickerViewContainer(this);
-                } else {
+                }
+                else {
                     viewContainer = new TextViewContainer(this);
                 }
                 frameArtBoard.addView(viewContainer.view);
@@ -256,7 +323,8 @@ public class EditorFragment extends Fragment {
             if (backgroundViewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL) {
                 JSONObject background = jsonObject.getJSONObject("background");
                 backgroundViewContainer.copyAttrFromJSON(background);
-            } else {
+            }
+            else {
                 // To fix 0dp height width I guess on activity result
                 backgroundViewContainer.fillParent();
             }
@@ -380,7 +448,8 @@ public class EditorFragment extends Fragment {
                     //activeViewContainer.view.setScaleX(.97f);
                     //activeViewContainer.view.setScaleY(.97f);
                 }
-            } else if (fingerCount == 2) {
+            }
+            else if (fingerCount == 2) {
                 if (activeViewContainer != null) {
                     viewInitialScale = activeViewContainer.scale;
                 }
@@ -420,7 +489,8 @@ public class EditorFragment extends Fragment {
                 */
                 }
                 positionSnapper.reset();
-            } else if (fingerCount == 2) {
+            }
+            else if (fingerCount == 2) {
                 rotationSnapper.reset();
             }
             setGuidePosition(invisible);

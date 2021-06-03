@@ -30,17 +30,15 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
-import com.google.android.gms.ads.rewarded.RewardedAdCallback;
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+//import com.google.android.gms.ads.rewarded.RewardedAdCallback;
 
 @SuppressLint("ClickableViewAccessibility")
 public class CreateBackgroundActivity extends AppCompatActivity {
@@ -148,7 +146,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        supportUsAd = createAndLoadRewardedAd(getString(R.string.ad_unit_support_us));
+        //supportUsAd = createAndLoadRewardedAd(getString(R.string.ad_unit_support_us));
 
     }
 
@@ -177,10 +175,16 @@ public class CreateBackgroundActivity extends AppCompatActivity {
 
     public void setEditorArtBoardFill(int color) {
         editorFragment.setArtBoardFill(color);
+        if (!editorFragment.isArtBoardVisible()) {
+            Toast.makeText(this, "Zoom out background image to set background color", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void setEditorArtBoardFill(int[] gradient, GradientDrawable.Orientation orientation) {
         editorFragment.setArtBoardFill(gradient, orientation);
+        if (!editorFragment.isArtBoardVisible()) {
+            Toast.makeText(this, "Zoom out background image to set background gradient", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void beforeFilterChange() {
@@ -273,11 +277,11 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     }
 
     public void onShowBackgroundImagesFragmentClick(View view) {
-        Background.setFragment(0);
+        Background.setFragment(1);
     }
 
     public void onShowBackgroundColorFragmentClick(View view) {
-        Background.setFragment(1);
+        Background.setFragment(0);
     }
 
     public void onShowRatioFragmentClick(View view) {
@@ -288,7 +292,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         Background.setFragment(3);
     }
 
-    public RewardedAd createAndLoadRewardedAd(String adUnitId) {
+    /*public RewardedAd createAndLoadRewardedAd(String adUnitId) {
         RewardedAd rewardedAd = new RewardedAd(this, adUnitId);
         RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
             @Override
@@ -303,7 +307,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         };
         rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
         return rewardedAd;
-    }
+    }*/
 
     public void onHamClick(View view) {
         drawerLayout.openDrawer(GravityCompat.START);
@@ -351,8 +355,8 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         public final FrameLayout canvas = findViewById(R.id.canvas);
 
         public final ImageButton[] menuButtons = new ImageButton[]{
-                findViewById(R.id.button_canvas_image),
                 findViewById(R.id.button_canvas_fill),
+                findViewById(R.id.button_canvas_image),
                 findViewById(R.id.button_canvas_ratio),
                 findViewById(R.id.button_filter),
                 findViewById(R.id.button_add_text),
@@ -468,15 +472,16 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     }
 
     void showSupportUsAdDialog() {
-        if (!supportUsAd.isLoaded()) {
+        /*if (!supportUsAd.isLoaded()) {
             //supportUsAd = createAndLoadRewardedAd(getString(R.string.ad_unit_support_us));
-        }
+        }*/
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("We'll now show an ad which will help us generate revenue.")
                 .setCancelable(false)
                 .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        if (supportUsAd.isLoaded()) {
+                        Toast.makeText(CreateBackgroundActivity.this, "Not Implemented", Toast.LENGTH_LONG).show();
+                        /*if (supportUsAd.isLoaded()) {
                             supportUsAd.show(CreateBackgroundActivity.this, new RewardedAdCallback() {
                                 @Override
                                 public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
@@ -494,7 +499,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
                             if (!supportUsAd.isLoaded()) {
                                 // supportUsAd = createAndLoadRewardedAd(getString(R.string.ad_unit_support_us));
                             }
-                        }
+                        }*/
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -515,13 +520,14 @@ public class CreateBackgroundActivity extends AppCompatActivity {
 
         public ViewPagerAdapter(FragmentManager fm) {
             super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-            backgroundImageFragment = (BackgroundImageFragment) fm.findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + 0);
-            if (backgroundImageFragment == null) {
-                backgroundImageFragment = new BackgroundImageFragment();
-            }
-            backgroundFillFragment = (BackgroundColorFragment) fm.findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + 1);
+
+            backgroundFillFragment = (BackgroundColorFragment) fm.findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + 0);
             if (backgroundFillFragment == null) {
                 backgroundFillFragment = new BackgroundColorFragment();
+            }
+            backgroundImageFragment = (BackgroundImageFragment) fm.findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + 1);
+            if (backgroundImageFragment == null) {
+                backgroundImageFragment = new BackgroundImageFragment();
             }
             ratioFragment = (RatioFragment) fm.findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + 2);
             if (ratioFragment == null) {
@@ -538,10 +544,10 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             Fragment fragment;
             if (position == 0) {
-                fragment = backgroundImageFragment;
+                fragment = backgroundFillFragment;
             }
             else if (position == 1) {
-                fragment = backgroundFillFragment;
+                fragment = backgroundImageFragment;
             }
             else if (position == 2) {
                 fragment = ratioFragment;

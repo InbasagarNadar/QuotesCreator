@@ -45,8 +45,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:scaleType="fitStart"
             android:padding="0dp"
+            android:scaleType="fitStart"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0" />
@@ -120,34 +120,42 @@
 
         <androidx.gridlayout.widget.GridLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/filter_strength_parent">
 
-            <ImageButton
-                android:layout_width="wrap_content"
+            <Button
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
-                android:onClick="onRemoveWatermarkClick"
-                android:src="@drawable/ic_remove_watermark"
-                android:tint="#000000"
-                app:layout_columnWeight="1" />
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackground"
+                android:drawableTop="@drawable/icon_share_vector"
+                android:drawableTint="#000000"
                 android:onClick="onShareClick"
-                android:src="@drawable/icon_share_vector"
+                android:text="Share"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                app:layout_columnWeight="1" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:drawableTop="@drawable/ic_remove_watermark"
+                android:onClick="onRemoveWatermarkClick"
+                android:text="Remove Watermark"
+                android:textAppearance="@style/TextAppearance.AppCompat"
                 android:tint="#000000"
                 app:layout_columnWeight="1" />
 
-            <ImageButton
-                android:layout_width="wrap_content"
+
+            <Button
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
                 android:onClick="onSaveClick"
-                android:src="@drawable/icon_download_vector"
-                android:tint="#000000"
+                android:drawableTop="@drawable/icon_download_vector"
+                android:drawableTint="#000000"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:text="Save"
+
                 app:layout_columnWeight="1" />
 
 
@@ -168,6 +176,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
+            android:layout_marginBottom="5dp"
             android:visibility="invisible"
             app:layout_constraintTop_toBottomOf="@id/filter_recycler_view">
 
@@ -200,8 +209,8 @@
             android:layout_height="130dp"
             android:layout_marginTop="5dp"
             android:fillViewport="true"
-            tools:listitem="@layout/filter_thumbnail_item"
-            app:layout_constraintTop_toBottomOf="@id/_filter_list_title" />
+            app:layout_constraintTop_toBottomOf="@id/_filter_list_title"
+            tools:listitem="@layout/filter_thumbnail_item" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

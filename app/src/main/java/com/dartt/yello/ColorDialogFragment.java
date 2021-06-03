@@ -82,25 +82,20 @@ public class ColorDialogFragment extends DialogFragment {
             setColor(savedInstanceState.getInt("selected_color"));
         }
         oldColorButton.setText(String.format("#%s", Integer.toHexString(oldColor).substring(2).toUpperCase()));
-        if (luminanceOf(oldColor) > LUMINANCE_POINT) {
+        if (GraphicsHelper.luminanceOf(oldColor) > LUMINANCE_POINT) {
             oldColorButton.setTextColor(Color.BLACK);
-        } else {
+        }
+        else {
             oldColorButton.setTextColor(Color.WHITE);
         }
         return v;
     }
 
-    float luminanceOf(int color) {
-        float r = (color >> 16) & 0xFF;
-        float g = (color >> 8) & 0xFF;
-        float b = color & 0xFF;
-        return (float) (0.2126 * r + 0.7152 * g + 0.0722 * b);
-    }
 
     void updateHex(int newColor) {
         hexCodeButton.setBackground(Variables.newColorDrawable(activity, newColor, Variables.CORNER_DP));
         hexCodeButton.setText(String.format("#%s", Integer.toHexString(newColor).substring(2).toUpperCase()));
-        if (luminanceOf(newColor) > LUMINANCE_POINT) {
+        if (GraphicsHelper.luminanceOf(newColor) > LUMINANCE_POINT) {
             hexCodeButton.setTextColor(0xFF000000);
         }
         else {

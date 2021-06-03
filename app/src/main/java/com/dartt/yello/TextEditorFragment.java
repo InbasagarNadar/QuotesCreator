@@ -2,9 +2,9 @@ package com.dartt.yello;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -22,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -30,9 +31,9 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -44,10 +45,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.dartt.yello.views.CustomColorPickerView;
 import com.jaredrummler.android.colorpicker.ColorPickerView;
 
+import java.util.ArrayList;
+
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class TextEditorFragment extends Fragment {
-
 
     int FONT_SEEK_BAR_MIN = 10;
 
@@ -63,10 +65,10 @@ public class TextEditorFragment extends Fragment {
     SeekBar letterSpacingSeekBar;
     SeekBar lineSpacingSeekBar;
     GridLayout fontOptionGrid;
-    CustomColorPickerView fontColorPicker;
-    ViewGroup fontColorPickerParent;
+    CustomColorPickerView fontBackgroundColorPicker;
+    ViewGroup constraintTextBackgroundParent;
     ImageButton textAlignmentImageButton;
-
+    ImageButton textHighlightImageButton;
     LinearLayout autoLanguageParent;
     TextView autoLanguageText;
 
@@ -148,7 +150,7 @@ public class TextEditorFragment extends Fragment {
 
         @Override
         CharacterStyle getNewSpan() {
-            return new ForegroundColorSpan(fontColorPicker.getColor());
+            return new ForegroundColorSpan(fontBackgroundColorPicker.getColor());
         }
 
         @Override
@@ -187,11 +189,14 @@ public class TextEditorFragment extends Fragment {
     RecyclerView recyclerFont;
     LanguageAdapter languageAdapter;
     TypefaceAdapter typefaceAdapter;
+    RecentColorAdapter recentColorAdapter;
 
     FontHolder currentEditorFont;
     FontHolder oldEditorFont;
-
+    int highlightOpacity = 0xFF000000;
+    boolean foregroundColorWindowMode;
     Drawable[] alignmentDrawables;
+    Drawable[] highlightOpacityDrawables;
     long[] _clickTime = {0, 0};
 
 
@@ -212,11 +217,12 @@ public class TextEditorFragment extends Fragment {
         letterSpacingSeekBar = fragment.findViewById(R.id.seekbar_letter_spacing);
         lineSpacingSeekBar = fragment.findViewById(R.id.seekbar_line_spacing);
         fontOptionGrid = fragment.findViewById(R.id.font_options_grid);
-        fontColorPicker = fragment.findViewById(R.id.font_color_picker);
-        fontColorPickerParent = fragment.findViewById(R.id.font_color_picker_parent);
+        fontBackgroundColorPicker = fragment.findViewById(R.id.font_background_color_picker);
+        constraintTextBackgroundParent = fragment.findViewById(R.id.constraintTextBackgroundPickerParent);
         fontPreviewText = fragment.findViewById(R.id.font_preview_text);
         typefacePanel = fragment.findViewById(R.id.font_typeface_panel);
         textAlignmentImageButton = fragment.findViewById(R.id.button_text_align);
+        textHighlightImageButton = fragment.findViewById(R.id.imageButtonTextHighlightOpacity);
         autoLanguageParent = fragment.findViewById(R.id.auto_language_parent);
         autoLanguageText = fragment.findViewById(R.id.auto_language_text);
 
@@ -291,13 +297,6 @@ public class TextEditorFragment extends Fragment {
 
             }
         });
-
-        fontColorPicker.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                insertStyling(colorSpan);
-            }
-        });
         parent.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -308,7 +307,7 @@ public class TextEditorFragment extends Fragment {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 typefacePanel.setVisibility(View.GONE);
-                editText.setShowSoftInputOnFocus(fontColorPickerParent.getVisibility() != View.VISIBLE);
+                editText.setShowSoftInputOnFocus(constraintTextBackgroundParent.getVisibility() != View.VISIBLE);
                 return view.onTouchEvent(motionEvent);
             }
         });
@@ -316,7 +315,7 @@ public class TextEditorFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (System.currentTimeMillis() - _clickTime[0] < 1200) {
-                    fontColorPickerParent.setVisibility(View.GONE);
+                    constraintTextBackgroundParent.setVisibility(View.GONE);
                     show();
                 }
                 _clickTime[0] = _clickTime[1];
@@ -346,6 +345,7 @@ public class TextEditorFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
+                // Fix for TextView bounds extending till placeholder/ hint.
                 if (editable.toString().length() == 0) {
                     editText.setHint("Type...");
                 }
@@ -360,6 +360,12 @@ public class TextEditorFragment extends Fragment {
                 ResourcesCompat.getDrawable(getResources(), R.drawable.align_left, null),
                 ResourcesCompat.getDrawable(getResources(), R.drawable.align_center, null),
                 ResourcesCompat.getDrawable(getResources(), R.drawable.align_right, null)
+        };
+
+        highlightOpacityDrawables = new Drawable[]{
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_outline_font_download_24, null),
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_twotone_font_download_24, null),
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_baseline_font_download_24, null)
         };
 
 
@@ -437,7 +443,16 @@ public class TextEditorFragment extends Fragment {
         fragment.findViewById(R.id.button_toggle_text_color_picker).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleFontColorPanel();
+                //foregroundColorWindowMode = true;
+                toggleFontHighlightPanel(true);
+            }
+        });
+
+        fragment.findViewById(R.id.button_toggle_text_highlight_color_picker).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //foregroundColorWindowMode = false;
+                toggleFontHighlightPanel(false);
             }
         });
 
@@ -470,9 +485,101 @@ public class TextEditorFragment extends Fragment {
             }
         });
 
+
+        ((ToggleButton) fragment.findViewById(R.id.toggleCustomTextHighlightColor)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                fragment.findViewById(R.id.constraintTextHighlightListParent).setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                fragment.findViewById(R.id.constraintTextHighlightCustomPickerParent).setVisibility(!isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        textHighlightImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (highlightOpacity == 0xFF000000) {
+                    highlightOpacity = 0x88000000;
+                }
+                else if (highlightOpacity == 0x88000000) {
+                    highlightOpacity = 0;
+                }
+                else {
+                    highlightOpacity = 0xFF000000;
+                }
+                setHighlightColor(((ColorDrawable) editText.getBackground()).getColor());
+            }
+        });
+
+        RecyclerView colorRecycler = fragment.findViewById(R.id.recyclerTextHighlightColor);
+        colorRecycler.setAdapter(new ColorAdapter(getContext()) {
+            @Override
+            void onColorClick(int color) {
+                setForegroundOrBackgroundColor(color);
+            }
+        });
+        colorRecycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+
+        recentColorAdapter = new RecentColorAdapter(getContext()) {
+            @Override
+            void onColorClick(int color) {
+                setForegroundOrBackgroundColor(color);
+            }
+        };
+
+        RecyclerView recentColorRecycler = fragment.findViewById(R.id.recyclerRecentHighlightColors);
+        recentColorRecycler.setAdapter(recentColorAdapter);
+        recentColorRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        /*fontForegroundColorPicker.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                insertStyling(colorSpan);
+            }
+        });*/
+        fontBackgroundColorPicker.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                setForegroundOrBackgroundColor(newColor);
+            }
+        });
+
+        fontBackgroundColorPicker.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    recentColorAdapter.addRecentColor(fontBackgroundColorPicker.getColor());
+                }
+                return false;
+            }
+        });
+
+        fragment.findViewById(R.id.button_toggle_background).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorDrawable colorDrawable = (ColorDrawable) fragment.getBackground();
+                if (colorDrawable.getColor() == 0xCCFFFFEE) {
+                    colorDrawable.setColor(0xDD111111);
+                }
+                else {
+                    colorDrawable.setColor(0xCCFFFFEE);
+                }
+            }
+        });
+
         return fragment;
     }
 
+    void setForegroundOrBackgroundColor(int color) {
+        fontBackgroundColorPicker.setColor(color | 0xFF000000, false);
+        if (foregroundColorWindowMode) {
+            insertStyling(colorSpan);
+        }
+        else {
+            if (highlightOpacity == 0) {
+                highlightOpacity = 0xFF000000;
+            }
+            setHighlightColor(color);
+        }
+    }
 
     @Override
     public void onResume() {
@@ -503,7 +610,7 @@ public class TextEditorFragment extends Fragment {
         parent.setVisibility(View.GONE);
         inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         editText.clearFocus();
-        fontColorPickerParent.setVisibility(View.GONE);
+        constraintTextBackgroundParent.setVisibility(View.GONE);
         hideTypefacePanel();
     }
 
@@ -515,6 +622,13 @@ public class TextEditorFragment extends Fragment {
         editText.setGravity(text.getGravity());
         editText.setTypeface(text.getTypeface());
         editText.setText(activeTextViewContainer.textContentOriginal);
+        int highlightColor = ((ColorDrawable) text.getBackground()).getColor();
+        highlightOpacity = highlightColor & 0xFF000000;
+        editText.setBackgroundColor(highlightColor);
+        setHighlightColor(highlightColor);
+        //((ColorDrawable)editText.getBackground()).setColor(highlightColor);
+        //editText.setBackground(editText.getBackground());
+        fontBackgroundColorPicker.setColor(highlightColor);
         setEditorAlignment(text.getGravity());
         currentEditorFont = textViewContainer.fontHolder;
         fontSizeSeekBar.setProgress((int) Variables.pixelToDensity(activity, (int) textViewContainer.textSizePx) - FONT_SEEK_BAR_MIN);
@@ -554,7 +668,9 @@ public class TextEditorFragment extends Fragment {
     }
 
     public void deleteText() {
-        activity.removeElement(activeTextViewContainer);
+        if (activeTextViewContainer.getView().getParent() != null) {
+            activity.removeElement(activeTextViewContainer);
+        }
         activeTextViewContainer = null;
         hide();
     }
@@ -625,17 +741,20 @@ public class TextEditorFragment extends Fragment {
             fontOptionGrid.setVisibility(View.GONE);
         }
         else {
-            fontColorPickerParent.setVisibility(View.GONE);
+            constraintTextBackgroundParent.setVisibility(View.GONE);
             fontOptionGrid.setVisibility(View.VISIBLE);
         }
     }
 
-    public void toggleFontColorPanel() {
-        if (fontColorPickerParent.getVisibility() == View.VISIBLE) {
-            fontColorPickerParent.setVisibility(View.GONE);
+
+    public void toggleFontHighlightPanel(boolean foregroundColorWindowMode) {
+        if (constraintTextBackgroundParent.getVisibility() == View.VISIBLE && foregroundColorWindowMode == this.foregroundColorWindowMode) {
+            constraintTextBackgroundParent.setVisibility(View.GONE);
         }
         else {
-            fontColorPickerParent.setVisibility(View.VISIBLE);
+            this.foregroundColorWindowMode = foregroundColorWindowMode;
+            textHighlightImageButton.setVisibility(foregroundColorWindowMode ? View.GONE : View.VISIBLE);
+            constraintTextBackgroundParent.setVisibility(View.VISIBLE);
             fontOptionGrid.setVisibility(View.GONE);
             inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
             Toast.makeText(activity, "Triple tap on text to show keyboard.", Toast.LENGTH_SHORT).show();
@@ -729,11 +848,41 @@ public class TextEditorFragment extends Fragment {
 
     }
 
+    final ColorStateList darkColorStateList = new ColorStateList(new int[][]{
+            new int[]{android.R.attr.state_enabled}}, new int[]{0xFF222222});
+    final ColorStateList lightColorStateList = new ColorStateList(new int[][]{
+            new int[]{android.R.attr.state_enabled}}, new int[]{0xFFFFFFFF});
+
+    void setHighlightColor(int color) {
+        color = (color & 0x00FFFFFF) | highlightOpacity;
+        editText.setBackgroundColor(color);
+        textHighlightImageButton.setImageTintList(new ColorStateList(new int[][]{
+                new int[]{android.R.attr.state_enabled}}, new int[]{color | 0xFF000000}));
+        if (GraphicsHelper.luminanceOf(color) > 100) {
+            textHighlightImageButton.setBackgroundTintList(darkColorStateList);
+        }
+        else {
+            textHighlightImageButton.setBackgroundTintList(lightColorStateList);
+        }
+        switch (highlightOpacity) {
+            case 0:
+                textHighlightImageButton.setImageDrawable(highlightOpacityDrawables[0]);
+                break;
+            case 0x88000000:
+                textHighlightImageButton.setImageDrawable(highlightOpacityDrawables[1]);
+                break;
+            default:
+                textHighlightImageButton.setImageDrawable(highlightOpacityDrawables[2]);
+                break;
+        }
+    }
+
     public void showTypefacePanel() {
         if (typefacePanel.getVisibility() != View.VISIBLE) {
             oldEditorFont = currentEditorFont;
             inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
             editText.clearFocus();
+            constraintTextBackgroundParent.setVisibility(View.GONE);
             typefacePanel.setVisibility(View.VISIBLE);
             languageAdapter.setCurrentLanguage(currentEditorFont.languageCode);
             typefaceAdapter.setAdapterFont(currentEditorFont);
@@ -756,218 +905,101 @@ public class TextEditorFragment extends Fragment {
         abstract CharacterStyle clone(CharacterStyle reference);
     }
 
+    static abstract class ColorAdapter extends RecyclerView.Adapter<ColorViewHolder> {
 
-    static class TypefaceAdapter extends RecyclerView.Adapter<TypefaceAdapter.FontViewHolder> {
-        int currentFontIndex = -1;
-        Lang language;
-        FontHolder[] fonts;
-        FontHolder selectedFont;
         Context context;
-        RecyclerView recyclerView;
-        OnItemSelectedListener onItemSelectedListener;
 
-        public TypefaceAdapter(Context context, RecyclerView recyclerView, Lang language) {
+        public ColorAdapter(Context context) {
             this.context = context;
-            this.recyclerView = recyclerView;
-            setLanguage(language);
-        }
-
-        public void setOnItemSelectedListener(OnItemSelectedListener onItemSelectedListener) {
-            this.onItemSelectedListener = onItemSelectedListener;
-        }
-
-        void setAdapterFont(FontHolder fontHolder) {
-
-            int oldFontIndex = currentFontIndex;
-            for (int i = 0; i < fonts.length; i++) {
-                if (fontHolder.equals(fonts[i])) {
-                    currentFontIndex = i;
-                    if (oldFontIndex >= 0) {
-                        notifyItemChanged(oldFontIndex);
-                    }
-                    notifyItemChanged(currentFontIndex);
-                    recyclerView.scrollToPosition(i);
-                    selectedFont = fontHolder;
-                    return;
-                }
-            }
-            currentFontIndex = -1;
-
         }
 
         @NonNull
         @Override
-        public FontViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TextView view = (TextView) LayoutInflater.from(context).inflate(R.layout.font_list_row, parent, false);
-            return new FontViewHolder(view);
+        public ColorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ImageButton view = (ImageButton) LayoutInflater.from(context).inflate(R.layout.item_color_row, parent, false);
+            return new ColorViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull FontViewHolder holder, final int position) {
-            final TextView view = holder.lblFontName;
-            view.setTypeface(fonts[position].typeface);
-            view.setText(fonts[position].name);
-            if (onItemSelectedListener != null) {
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (currentFontIndex >= 0) {
-                            notifyItemChanged(currentFontIndex);
-                        }
-                        currentFontIndex = position;
-                        view.setTextColor(0xFFFFBF00);
-                        selectedFont = fonts[position];
-                        onItemSelectedListener.onItemSelected(selectedFont);
-                    }
-                });
-            }
-            if (currentFontIndex == position) {
-                view.setTextColor(0xFFFFBF00);
-            }
-            else {
-                view.setTextColor(0xFF000000);
-            }
+        public void onBindViewHolder(@NonNull ColorViewHolder holder, final int position) {
+            //holder.colorButton.setBackgroundColor(Variables.Colors[position]);
+            holder.colorButton.setBackground(Variables.newColorDrawable(context, Variables.Colors[position], Variables.CORNER_DP));
+            holder.colorButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onColorClick(Variables.Colors[position]);
+                }
+            });
         }
 
         @Override
         public int getItemCount() {
-            return fonts.length;
+            return Variables.Colors.length;
         }
 
-        public void setLanguage(Lang language) {
-            if (this.language != null) {
-                if (this.language.equals(language)) {
-                    return;
-                }
-            }
-            currentFontIndex = -1;
-            this.language = language;
-            fonts = language.getFonts(context);
-            notifyDataSetChanged();
-            if (selectedFont != null) {
-                setAdapterFont(selectedFont);
-            }
-        }
-
-        interface OnItemSelectedListener {
-            void onItemSelected(FontHolder fontHolder);
-        }
-
-        static class FontViewHolder extends RecyclerView.ViewHolder {
-            TextView lblFontName;
-
-            public FontViewHolder(@NonNull View itemView) {
-                super(itemView);
-                lblFontName = (TextView) itemView;
-            }
-        }
+        abstract void onColorClick(int color);
     }
 
-
-    static class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder> {
-
-        int currentLanguageIndex;
+    static abstract class RecentColorAdapter extends RecyclerView.Adapter<ColorViewHolder> {
         Context context;
-        Lang[] activeLanguages;
-        OnLanguageSelectedListener languageSelectedListener;
+        ArrayList<Integer> recentColors;
 
-        public LanguageAdapter(Context context) {
+        public RecentColorAdapter(Context context) {
             this.context = context;
-            activeLanguages = LanguageManager.getActiveLanguages(context);
-        }
-
-        void setOnLanguageSelectedListener(OnLanguageSelectedListener listener) {
-            languageSelectedListener = listener;
-        }
-
-        void setCurrentLanguage(String languageCode) {
-            for (int i = 0; i < activeLanguages.length; i++) {
-                Lang lang = activeLanguages[i];
-                if (languageCode.equals(lang.code)) {
-                    int oldPosition = currentLanguageIndex;
-                    currentLanguageIndex = i;
-                    notifyItemChanged(oldPosition);
-                    notifyItemChanged(i);
-                    languageSelectedListener.onLanguageSelected(lang);
-                    return;
-                }
-            }
-            AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                    .setMessage("You haven't downloaded the language yet. Do you want to download it now?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            context.startActivity(new Intent(context, ManageLanguageActivity.class));
-                        }
-                    })
-                    .setNegativeButton("No", null);
-            builder.show();
+            recentColors = new ArrayList<>();
+            recentColors.add(0xFFFFFFFF);
+            recentColors.add(0xFF000000);
         }
 
         @NonNull
         @Override
-        public LanguageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.language_list_item, parent, false);
-            return new LanguageViewHolder(view);
+        public ColorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ImageButton view = (ImageButton) LayoutInflater.from(context).inflate(R.layout.item_color_row, parent, false);
+            return new ColorViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull LanguageViewHolder holder, final int position) {
-            if (position < activeLanguages.length) {
-                holder.lblLanguageName.setText(activeLanguages[position].locale);
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (languageSelectedListener != null) {
-                            int oldPosition = currentLanguageIndex;
-                            currentLanguageIndex = position;
-                            notifyItemChanged(oldPosition);
-                            notifyItemChanged(position);
-                            languageSelectedListener.onLanguageSelected(activeLanguages[position]);
-                        }
-                    }
-                });
-            }
-            else {
-                holder.lblLanguageName.setText("  +  ");
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        context.startActivity(new Intent(context, ManageLanguageActivity.class));
-                    }
-                });
-            }
-            if (currentLanguageIndex == position) {
-                holder.lblLanguageName.setTextColor(0xFFFFBF00);
-            }
-            else {
-                holder.lblLanguageName.setTextColor(0xFF000000);
-            }
-
+        public void onBindViewHolder(@NonNull ColorViewHolder holder, final int position) {
+            //holder.colorButton.setBackgroundColor(recentColors.get(position));
+            holder.colorButton.setBackground(Variables.newColorDrawable(context, recentColors.get(position), Variables.CORNER_DP));
+            holder.colorButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onColorClick(recentColors.get(position));
+                }
+            });
         }
 
         @Override
         public int getItemCount() {
-            return activeLanguages.length + 1;
+            return recentColors.size();
         }
 
-        public void refreshLanguages() {
-            activeLanguages = LanguageManager.getActiveLanguages(context);
-            notifyDataSetChanged();
-        }
-
-        interface OnLanguageSelectedListener {
-            void onLanguageSelected(Lang language);
-        }
-
-        static class LanguageViewHolder extends RecyclerView.ViewHolder {
-            TextView lblLanguageName;
-
-            public LanguageViewHolder(@NonNull View itemView) {
-                super(itemView);
-                lblLanguageName = (TextView) itemView;
+        void addRecentColor(int color) {
+            color = color | 0xFF000000;
+            if (!recentColors.contains(color)) {
+                recentColors.add(0, color);
+                if (recentColors.size() > 20) {
+                    recentColors.remove(recentColors.size() - 1);
+                }
+                notifyDataSetChanged();
             }
         }
+
+        abstract void onColorClick(int color);
+
     }
+
+    static class ColorViewHolder extends RecyclerView.ViewHolder {
+        ImageButton colorButton;
+
+        public ColorViewHolder(@NonNull View itemView) {
+            super(itemView);
+            colorButton = (ImageButton) itemView;
+        }
+    }
+
+
 }
 
 /*

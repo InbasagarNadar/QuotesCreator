@@ -118,7 +118,6 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="50dp"
                 android:layout_marginBottom="50dp">
-
                 <androidx.gridlayout.widget.GridLayout
                     android:id="@+id/option_menu"
                     android:layout_width="match_parent"
@@ -128,17 +127,6 @@
                     app:layout_constraintBottom_toBottomOf="parent">
 
                     <ImageButton
-                        android:id="@+id/button_canvas_image"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:background="?attr/selectableItemBackground"
-                        android:contentDescription="Images"
-                        android:onClick="onShowBackgroundImagesFragmentClick"
-                        android:src="@drawable/gallery_vector"
-                        android:tint="@color/colorAccent"
-                        app:layout_columnWeight="1" />
-
-                    <ImageButton
                         android:id="@+id/button_canvas_fill"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -146,6 +134,17 @@
                         android:contentDescription="Colors"
                         android:onClick="onShowBackgroundColorFragmentClick"
                         android:src="@drawable/icon_color_palette_vector"
+                        android:tint="@color/colorAccent"
+                        app:layout_columnWeight="1" />
+
+                    <ImageButton
+                        android:id="@+id/button_canvas_image"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:contentDescription="Images"
+                        android:onClick="onShowBackgroundImagesFragmentClick"
+                        android:src="@drawable/gallery_vector"
                         android:tint="#000"
                         app:layout_columnWeight="1" />
 
@@ -169,7 +168,7 @@
                         android:onClick="onShowFilterFragmentClick"
                         android:src="@drawable/ic_photo_filter"
                         android:tint="#000"
-                        android:visibility="visible"
+                        android:visibility="gone"
                         app:layout_columnWeight="1" />
 
                     <ImageButton

@@ -69,7 +69,7 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
                 }
             });
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(_40dp, _40dp);
-            params.leftMargin = _5dp;
+            params.rightMargin = _5dp;
             button.setLayoutParams(params);
             backgroundImageButtonList.addView(button);
 
@@ -82,9 +82,9 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
                 }
             });
         }
-        View buttonShowInternetImagePicker = fragment.findViewById(R.id.button_show_internet_image_picker);
+        /*View buttonShowInternetImagePicker = fragment.findViewById(R.id.button_show_internet_image_picker);
         backgroundImageButtonList.removeView(buttonShowInternetImagePicker);
-        backgroundImageButtonList.addView(buttonShowInternetImagePicker);
+        backgroundImageButtonList.addView(buttonShowInternetImagePicker);*/
 
         fragment.findViewById(R.id.img_btn_gallery_background).setOnClickListener(this);
         fragment.findViewById(R.id.btn_remove_background).setOnClickListener(this);
@@ -156,8 +156,10 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
         if (resultCode == RESULT_OK) {
             if (requestCode == INTERNET_IMAGE_REQUEST_CODE) {
                 activity.setEditorBackground(resultIntent.getExtras().getString("image_url"));
+                btnRemoveBackground.setVisibility(View.VISIBLE);
             } else if (requestCode == SELECT_BACKGROUND_IMAGE_REQUEST_CODE) {
                 activity.setEditorBackground(resultIntent.getData());
+                btnRemoveBackground.setVisibility(View.VISIBLE);
             }
             Log.e("Frag", "OnActivityResult");
         }

@@ -6,11 +6,11 @@ import android.graphics.drawable.GradientDrawable.Orientation;
 
 public class Variables {
     public static int[][] Gradients = {
-            {0xFFFDC05B, 0xFFDD2D75, 0xFFA734B4,},
             {0xFFFF6E7F, 0xFFBFE9FF},
+            {0xFFFDC05B, 0xFFDD2D75, 0xFFA734B4},
+            {0XFFC6FFDD, 0xFFFBD786, 0xFFf7797D},
             {0xFFE44D87, 0xFF5FC3E4},
             {0xFFEF3B36, 0xFFFFFFFF},
-            {0XFFc6ffdd, 0xFFfbd786, 0xFFf7797d},
             {0xFFABBAAB, 0xFFFFFFFF},
             {0xFFFFFFFF, 0xFF000000},
             {0xFF005AA7, 0xFFFFFDE4},
@@ -33,6 +33,8 @@ public class Variables {
     public static Orientation currentGradientOrientation = GradientsOrientation[0];
 
     public static final int[] Colors = {
+            0xFF000000,
+            0xFFFFFFFF,
             0xFFF7E5DE,
             0xFFFFBF00,
             0xFF355C7D,
@@ -48,7 +50,7 @@ public class Variables {
             0xFFFF69B4,
             0xFFF4951B
     };
-    public static int currentColor = Colors[0];
+    public static int currentColor = Colors[2];
 
     public static final int[] BackgroundImages = {
             R.drawable.background_00,
@@ -113,6 +115,30 @@ public class Variables {
             R.drawable.sticker_28_dice,
             R.drawable.sticker_29_cat,
             R.drawable.sticker_30_flower
+    };
+
+    public static String[] randomQuotes = {
+            "All we have to decide is what to do with the time that is given to us.",
+            "Life moves pretty fast. If you don't stop and look around once in a while, you could miss it.",
+            "I don't want to survive. I want to live.",
+            "Every man dies but not every man really lives.",
+            "I have to believe that when things are bad I can change them.",
+            "You cannot live your life to please others. The choice must be yours.",
+            "Sometimes the right path is not the easiest one.",
+            "If you focus on what you left behind, you will never be able to see what lies ahead.",
+            "You'll have bad times, but it'll always wake you up to the good stuff you weren't paying attention to.",
+            "The very things that hold you down are going to lift you up.",
+            "It's what you do right now that makes a difference.",
+            "As he read, I fell in love the way you fall asleep: slowly, and then all at once.\nJohn Green",
+            "My thoughts are stars I can't fathom into constellations.\nJohn Green",
+            "What a treacherous thing to believe that a person is more than a person.\nJohn Green",
+            "What is the point of being alive if you don't at least try to do something remarkable?\nJohn Green",
+            "All we have decide is what to do with the time that is given us.\nJ.R.R. Tolkein",
+            "Memories warm you up from the inside. But they also tear you apart.\nHaruki Murakami",
+            "It does not do to dwell on dreams and forget to live.\nJ.K. Rowling",
+            "Nowadays people know the price of everything and value of nothing\nOscar Wilde",
+            "Time is the longest distance between two places.\nTennessee Williams"
+
     };
 
     public static final int CORNER_DP = 5;

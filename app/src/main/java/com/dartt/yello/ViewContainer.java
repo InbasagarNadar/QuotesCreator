@@ -3,12 +3,15 @@ package com.dartt.yello;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.text.Html;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
+import android.text.SpannedString;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -130,7 +133,8 @@ public class ViewContainer implements JsonSerializable {
             view.setVisibility(jsonObject.getBoolean("visible") ? View.VISIBLE : View.GONE);
             scale = 1;
             view.setLayoutParams(params);
-        } else {
+        }
+        else {
             view.setVisibility(View.GONE);
         }
     }
@@ -243,7 +247,7 @@ class ImageViewContainer extends ViewContainer {
 
         @Override
         public void onLoadCleared(@Nullable Drawable placeholder) {
-
+            getView().setImageBitmap(null);
         }
     };
 
@@ -270,6 +274,7 @@ class ImageViewContainer extends ViewContainer {
         currentBackgroundType = BACKGROUND_TYPE_URI;
         currentBackgroundUri = imageUri;
         //resetFilter();
+
         Glide.with(getView()).load(imageUri).into(target);
     }
 
@@ -331,11 +336,13 @@ class ImageViewContainer extends ViewContainer {
         if (imageRatio == canvasRatio) {
             params.width = canvasDimension[0];
             params.height = canvasDimension[1];
-        } else if (imageRatio < canvasRatio) {
+        }
+        else if (imageRatio < canvasRatio) {
             params.width = canvasDimension[0];
             params.height = (int) Math.ceil(canvasDimension[0] / imageRatio);
             params.topMargin = (canvasDimension[1] - params.height) / 2;
-        } else {
+        }
+        else {
             params.width = (int) Math.ceil(canvasDimension[1] * imageRatio);
             params.height = canvasDimension[1];
             params.leftMargin = (canvasDimension[0] - params.width) / 2;
@@ -414,7 +421,7 @@ class TextViewContainer extends ViewContainer {
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_TEXT_SIZE_DP);
         textSizePx = Variables.densityToPixel(editorFragment.activity, DEFAULT_TEXT_SIZE_DP);
-        textView.setTextColor(0xFFFFFFFF);
+        textView.setTextColor(0xFF000000);
         textView.setTypeface(fontHolder.typeface);
         textView.setOnTouchListener(new EditorFragment.ViewOnTouchListener(editorFragment) {
             @Override
@@ -422,6 +429,7 @@ class TextViewContainer extends ViewContainer {
                 return TextViewContainer.this;
             }
         });
+        textView.setBackground(new ColorDrawable(0x00FFFF77));
 
         view = textView;
     }
@@ -444,9 +452,16 @@ class TextViewContainer extends ViewContainer {
         getView().setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSizePx * scale);
     }
 
-    public void setText(EditText source) {
+    public void setText(TextView source) {
         textContentOriginal = new SpannableStringBuilder(source.getText());
-        SpannableStringBuilder stringBuilder = (SpannableStringBuilder) source.getText();
+        SpannableStringBuilder stringBuilder;
+        // maybe we can combine this
+        if (source.getText() instanceof SpannedString) {
+            stringBuilder = new SpannableStringBuilder(source.getText());
+        }
+        else {
+            stringBuilder = (SpannableStringBuilder) source.getText();
+        }
         Layout layout = source.getLayout();
         for (int lineCount = source.getLineCount() - 1; lineCount > 0; --lineCount) {
             int end = layout.getLineStart(lineCount);
@@ -464,6 +479,7 @@ class TextViewContainer extends ViewContainer {
         textView.setLineSpacing(0, source.getLineSpacingMultiplier());
         textView.setGravity(source.getGravity());
         textView.setTypeface(source.getTypeface());
+        ((ColorDrawable) textView.getBackground()).setColor(((ColorDrawable) source.getBackground()).getColor());
         textView.setVisibility(View.VISIBLE);
         setText(source);
         setTextSizePx((int) source.getTextSize());
@@ -480,14 +496,11 @@ class TextViewContainer extends ViewContainer {
             jsonObject.put("languageCode", fontHolder.languageCode);
             jsonObject.put("fontName", fontHolder.name);
             jsonObject.put("textSizePx", textSizePx);
-            jsonObject.put("textContentOriginal", Html.toHtml(textContentOriginal));
-            jsonObject.put("textViewContent", Html.toHtml(new SpannableStringBuilder(textView.getText())));
-            int newLineCount = 0;
-            while (textContentOriginal.charAt(textContentOriginal.length() - 1 - newLineCount) == '\n') {
-                newLineCount++;
-            }
-            jsonObject.put("newLineCount", newLineCount);
+            jsonObject.put("textHighlightColor", ((ColorDrawable) textView.getBackground()).getColor());
+            jsonObject.put("textContentOriginal", CustomHtml.toHtml(textContentOriginal));
+            jsonObject.put("textViewContent", CustomHtml.toHtml(new SpannableStringBuilder(textView.getText())));
         }
+        Log.d("Out Text JSON", jsonObject.toString());
         return jsonObject;
     }
 
@@ -509,24 +522,8 @@ class TextViewContainer extends ViewContainer {
                 setTextSizePx(jsonObject.getInt("textSizePx"));
                 textContentOriginal = new SpannableStringBuilder(Html.fromHtml(jsonObject.getString("textContentOriginal")));
                 SpannableStringBuilder textViewContent = new SpannableStringBuilder(Html.fromHtml(jsonObject.getString("textViewContent")));
-
-                // New Line Fix. Basically fixing p tag stuff which added unnecessary new line
-                int currentNewLineCount = 0;
-                int targetNewLineCount = jsonObject.getInt("newLineCount");
-                while (textContentOriginal.charAt(textContentOriginal.length() - 1 - currentNewLineCount) == '\n') {
-                    currentNewLineCount++;
-                }
-                if (currentNewLineCount > targetNewLineCount) {
-                    textContentOriginal.delete(textContentOriginal.length() - currentNewLineCount + targetNewLineCount, textContentOriginal.length());
-                    textViewContent.delete(textViewContent.length() - currentNewLineCount + targetNewLineCount, textContentOriginal.length());
-                } else {
-                    while (targetNewLineCount != currentNewLineCount) {
-                        textContentOriginal.append("\n");
-                        textViewContent.append("\n");
-                        currentNewLineCount++;
-                    }
-                }
                 textView.setText(textViewContent);
+                ((ColorDrawable) textView.getBackground()).setColor(jsonObject.getInt("textHighlightColor"));
             }
         }
     }
@@ -572,7 +569,8 @@ class ArtBoardViewContainer extends ViewContainer {
         jsonObject.put("left", view.getLeft());
         if (currentFillType == FILL_TYPE_COLOR) {
             jsonObject.put("color", currentColor);
-        } else {
+        }
+        else {
             JSONArray gradient = new JSONArray();
             for (int color : currentGradient) {
                 gradient.put(color);
@@ -590,7 +588,8 @@ class ArtBoardViewContainer extends ViewContainer {
         setRatio(jsonObject.getString("dimensionRatio"), false, null);
         if (currentFillType == FILL_TYPE_COLOR) {
             setArtBoardFill(jsonObject.getInt("color"));
-        } else {
+        }
+        else {
             JSONArray gradientJson = jsonObject.getJSONArray("gradient");
             int[] gradient = new int[gradientJson.length()];
             for (int i = 0; i < gradientJson.length(); i++) {

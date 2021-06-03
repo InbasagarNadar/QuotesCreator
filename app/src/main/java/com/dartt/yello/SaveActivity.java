@@ -46,12 +46,7 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
-import com.google.android.gms.ads.rewarded.RewardedAdCallback;
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 
@@ -60,6 +55,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+
+//import com.google.android.gms.ads.rewarded.RewardedAdCallback;
 
 public class SaveActivity extends AppCompatActivity {
 
@@ -240,15 +237,15 @@ public class SaveActivity extends AppCompatActivity {
 
     public void onRemoveWatermarkClick(View view) {
         if (!watermarkRemoved) {
-            if (!watermarkRewardedAd.isLoaded()) {
+            /*if (!watermarkRewardedAd.isLoaded()) {
                 //initWatermarkRewardedAd();
-            }
+            }*/
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Remove Watermark")
                     .setMessage("We'll now show a short ad. Please watch the full ad to remove watermark.")
                     .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            try {
+                            /*try {
                                 if (watermarkRewardedAd.isLoaded()) {
                                     watermarkRewardedAd.show(SaveActivity.this, new RewardedAdCallback() {
                                         @Override
@@ -280,11 +277,11 @@ public class SaveActivity extends AppCompatActivity {
 
                                 }
                             } catch (Exception e) {
-                                Log.e("ADMOB", e.toString());
+                                Log.e("ADMOB", e.toString());*/
                                 watermarkRemoved = true;
                                 watermarkImageButton.setVisibility(View.GONE);
                                 savedPath = null;
-                            }
+                            //}
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -309,7 +306,7 @@ public class SaveActivity extends AppCompatActivity {
     }
 
     void initWatermarkRewardedAd() {
-        try {
+        /*try {
             watermarkRewardedAd = new RewardedAd(this, getString(R.string.ad_unit_remove_watermark));
             RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
                 @Override
@@ -325,7 +322,7 @@ public class SaveActivity extends AppCompatActivity {
             watermarkRewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
         } catch (Exception e) {
             Log.e("ADMOB", e.toString());
-        }
+        }*/
     }
 
     final String IMAGES_FOLDER_NAME = "Yello";

@@ -23,6 +23,8 @@ import androidx.fragment.app.DialogFragment;
 import com.dartt.yello.views.CustomColorPickerView;
 import com.jaredrummler.android.colorpicker.ColorPickerView;
 
+import static com.dartt.yello.GraphicsHelper.luminanceOf;
+
 public class GradientDialogFragment extends DialogFragment {
 
     Orientation[] orientations = new Orientation[]{Orientation.LEFT_RIGHT, Orientation.BL_TR, Orientation.BOTTOM_TOP, Orientation.BR_TL, Orientation.RIGHT_LEFT, Orientation.TR_BL, Orientation.TOP_BOTTOM, Orientation.TL_BR};
@@ -98,7 +100,7 @@ public class GradientDialogFragment extends DialogFragment {
             colorButtons[i] = button;
             colors_parent.addView(button);
             int color = Variables.currentGradient[Math.min(i, colorCount - 1)];
-            if (luminanceOf(color) > LUMINANCE_POINT) {
+            if (GraphicsHelper.luminanceOf(color) > LUMINANCE_POINT) {
                 button.setTextColor(0xFF000000);
             }
             else {
@@ -167,13 +169,6 @@ public class GradientDialogFragment extends DialogFragment {
             }
         });
         return v;
-    }
-
-    float luminanceOf(int color) {
-        float r = (color >> 16) & 0xFF;
-        float g = (color >> 8) & 0xFF;
-        float b = color & 0xFF;
-        return (float) (0.2126 * r + 0.7152 * g + 0.0722 * b);
     }
 
     void onColorButtonClick(int index) {

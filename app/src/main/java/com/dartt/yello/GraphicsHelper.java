@@ -26,7 +26,8 @@ public class GraphicsHelper {
                 Canvas canvas = new Canvas(ret);
                 if (setContrastBrightness) {
                     cm = new ColorMatrix(new float[]{contrast, 0, 0, 0,
-                            brightness, 0, contrast, 0, 0, brightness, 0, 0, contrast,
+                            brightness, 0, contrast, 0,
+                            0, brightness, 0, 0, contrast,
                             0, brightness, 0, 0, 0, 1, 0});
                     paint.setColorFilter(new ColorMatrixColorFilter(cm));
                     canvas.drawBitmap(bmp, 0, 0, paint);
@@ -52,4 +53,21 @@ public class GraphicsHelper {
         }
     }
 
+    public static float luminanceOf(int color) {
+        float r = (color >> 16) & 0xFF;
+        float g = (color >> 8) & 0xFF;
+        float b = color & 0xFF;
+        return (float) (0.2126 * r + 0.7152 * g + 0.0722 * b);
+    }
+
+    /*
+    * Checks if child is inside parent
+    *
+    public static boolean isRectInside(Rect2D child, Rect2D parent){
+
+    }
+
+    public static class Rect2D{
+        float x, y, width, height;
+    }*/
 }

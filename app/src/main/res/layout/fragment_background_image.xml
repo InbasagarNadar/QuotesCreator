@@ -4,17 +4,75 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/create_background_fragment_height"
+    android:animateLayoutChanges="true"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     tools:context=".CreateBackgroundActivity">
 
+    <ImageButton
+        android:id="@+id/btn_remove_background"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/shape_rounded_corner"
+        android:elevation="2dp"
+        android:padding="5dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/trash_can_vector"
+        android:tint="#d00"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/img_btn_gallery_background"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/shape_rounded_corner"
+        android:elevation="2dp"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/gallery_vector"
+        android:tint="#000"
+        app:layout_constraintStart_toEndOf="@id/btn_remove_background"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageButton
+        android:id="@+id/button_show_internet_image_picker"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="5dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/shape_rounded_corner"
+        android:elevation="2dp"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_baseline_search_24"
+        android:tint="#000"
+        app:layout_constraintStart_toEndOf="@id/img_btn_gallery_background"
+        app:layout_constraintTop_toTopOf="@id/img_btn_gallery_background" />
+
+    <View
+        android:layout_width="1dp"
+        app:layout_constraintTop_toTopOf="@id/img_btn_gallery_background"
+        app:layout_constraintStart_toEndOf="@id/button_show_internet_image_picker"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_height="30dp"
+        android:background="@android:color/darker_gray" />
 
     <HorizontalScrollView
         android:id="@+id/horizontal_scroll_view"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="60dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/button_show_internet_image_picker">
 
         <LinearLayout
             android:id="@+id/background_image_linear_layout"
@@ -23,48 +81,7 @@
             android:animateLayoutChanges="true"
             android:clipToPadding="false"
             android:orientation="horizontal"
-            android:padding="5dp">
-
-            <ImageButton
-                android:id="@+id/btn_remove_background"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/shape_rounded_corner"
-                android:elevation="2dp"
-                android:padding="5dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/trash_can_vector"
-                android:tint="#d00" />
-
-            <ImageButton
-                android:id="@+id/img_btn_gallery_background"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:adjustViewBounds="true"
-                android:background="@drawable/shape_rounded_corner"
-                android:elevation="2dp"
-                android:padding="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/gallery_vector"
-                android:tint="#000" />
-
-
-            <ImageButton
-                android:id="@+id/button_show_internet_image_picker"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="5dp"
-                android:adjustViewBounds="true"
-                android:background="@drawable/shape_rounded_corner"
-                android:elevation="2dp"
-                android:padding="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/more_images"
-                android:tint="#000" />
-
-
-        </LinearLayout>
+            android:paddingTop="5dp" />
 
     </HorizontalScrollView>
 
