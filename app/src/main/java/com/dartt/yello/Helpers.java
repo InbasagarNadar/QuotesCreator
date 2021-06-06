@@ -585,30 +585,44 @@ class CustomHtml {
             ssBuilder.insert(start, "<u>");
             ssBuilder.insert(end + 3, "</u>");
         }
-
-        ForegroundColorSpan[] foregroundSpans = ssBuilder.getSpans(0, ssBuilder.length(), ForegroundColorSpan.class);
         SparseArray<String> strings = new SparseArray<>();
-        for (int i = foregroundSpans.length - 1; i >= 0; i--) {
-            ForegroundColorSpan span = foregroundSpans[i];
-            start = ssBuilder.getSpanStart(span);
-            end = ssBuilder.getSpanEnd(span);
-            ssBuilder.removeSpan(span);
-            String colorCode = Integer.toHexString(span.getForegroundColor()).substring(2);
-            String spanBegin = String.format("<span style=\"color:#%s;\">", colorCode);
-            strings.append(start, spanBegin + ssBuilder.subSequence(start, end) + "</span>");
-        }
-
         StringBuilder finalString = new StringBuilder();
-        while (strings.size() > 0) {
-            int min = strings.keyAt(0);
-            for (int i = 0; i < strings.size(); i++) {
-                if (strings.keyAt(i) < min) {
-                    min = strings.keyAt(i);
+        ForegroundColorSpan[] foregroundSpans = ssBuilder.getSpans(0, ssBuilder.length(), ForegroundColorSpan.class);
+        if (foregroundSpans.length == 0) {
+            finalString.append(ssBuilder);
+        }
+        else {
+            int lastSpanEnd = 0;
+            for (int i = foregroundSpans.length - 1; i >= 0; i--) {
+                ForegroundColorSpan span = foregroundSpans[i];
+                start = ssBuilder.getSpanStart(span);
+                end = ssBuilder.getSpanEnd(span);
+                ssBuilder.removeSpan(span);
+                String colorCode = Integer.toHexString(span.getForegroundColor()).substring(2);
+                String spanBegin = String.format("<span style=\"color:#%s;\">", colorCode);
+                strings.append(start, spanBegin + ssBuilder.subSequence(start, end) + "</span>");
+                if (lastSpanEnd < end) {
+                    lastSpanEnd = end;
                 }
             }
-            finalString.append(strings.get(min));
-            strings.remove(min);
+            int prevEnd = 0;
+            while (strings.size() > 0) {
+                int min = strings.keyAt(0);
+                for (int i = 0; i < strings.size(); i++) {
+                    if (strings.keyAt(i) < min) {
+                        min = strings.keyAt(i);
+                    }
+                }
+                finalString.append(ssBuilder.subSequence(prevEnd, min));
+                prevEnd = strings.get(min).length() + min - 36;
+                finalString.append(strings.get(min));
+                strings.remove(min);
+            }
+            if (prevEnd < ssBuilder.length()) {
+                finalString.append(ssBuilder.subSequence(prevEnd, ssBuilder.length()));
+            }
         }
+
         replace(finalString, '\n', "<br/>");
 
         return finalString.toString();

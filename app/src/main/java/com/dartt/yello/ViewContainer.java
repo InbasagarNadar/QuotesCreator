@@ -11,7 +11,6 @@ import android.text.Html;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.SpannedString;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -499,8 +498,10 @@ class TextViewContainer extends ViewContainer {
             jsonObject.put("textHighlightColor", ((ColorDrawable) textView.getBackground()).getColor());
             jsonObject.put("textContentOriginal", CustomHtml.toHtml(textContentOriginal));
             jsonObject.put("textViewContent", CustomHtml.toHtml(new SpannableStringBuilder(textView.getText())));
+            jsonObject.put("lineSpacing", textView.getLineSpacingMultiplier());
+            jsonObject.put("letterSpacing", textView.getLetterSpacing());
         }
-        Log.d("Out Text JSON", jsonObject.toString());
+        //Log.d("Out Text JSON", jsonObject.toString());
         return jsonObject;
     }
 
@@ -517,7 +518,8 @@ class TextViewContainer extends ViewContainer {
                     fontHolder = LanguageManager.getDefaultFont(view.getContext());
                 }
                 textView.setTypeface(fontHolder.typeface);
-
+                textView.setLineSpacing(0, (float) jsonObject.getDouble("lineSpacing"));
+                textView.setLetterSpacing((float) jsonObject.getDouble("letterSpacing"));
                 scale = (float) jsonObject.getDouble("scale");
                 setTextSizePx(jsonObject.getInt("textSizePx"));
                 textContentOriginal = new SpannableStringBuilder(Html.fromHtml(jsonObject.getString("textContentOriginal")));

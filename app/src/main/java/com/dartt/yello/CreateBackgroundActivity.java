@@ -267,6 +267,7 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         //((FilterFragment) fragment).resetFilter(editorFragment.backgroundViewContainer);
         viewPagerAdapter.filterFragment.resetFilter(editorFragment.backgroundViewContainer);
         viewPagerAdapter.backgroundImageFragment.resetState(editorFragment.backgroundViewContainer);
+        findViewById(R.id.button_filter).setVisibility(editorFragment.backgroundViewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL ? View.GONE : View.VISIBLE);
     }
 
     /////////////////////////////////////////////////////////////////////////

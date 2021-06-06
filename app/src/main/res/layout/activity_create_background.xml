@@ -56,7 +56,7 @@
                     android:padding="10dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/icon_ham_vector"
-                    android:tint="@color/colorAccent"
+                    app:tint="@color/colorAccent"
 
                     app:layout_constraintStart_toStartOf="parent" />
 
@@ -134,8 +134,8 @@
                         android:contentDescription="Colors"
                         android:onClick="onShowBackgroundColorFragmentClick"
                         android:src="@drawable/icon_color_palette_vector"
-                        android:tint="@color/colorAccent"
-                        app:layout_columnWeight="1" />
+                        app:layout_columnWeight="1"
+                        app:tint="@color/colorAccent" />
 
                     <ImageButton
                         android:id="@+id/button_canvas_image"
@@ -145,8 +145,8 @@
                         android:contentDescription="Images"
                         android:onClick="onShowBackgroundImagesFragmentClick"
                         android:src="@drawable/gallery_vector"
-                        android:tint="#000"
-                        app:layout_columnWeight="1" />
+                        app:layout_columnWeight="1"
+                        app:tint="#000" />
 
                     <ImageButton
                         android:id="@+id/button_canvas_ratio"
@@ -156,8 +156,8 @@
                         android:contentDescription="Aspect Ratio"
                         android:onClick="onShowRatioFragmentClick"
                         android:src="@drawable/icon_crop_vector"
-                        android:tint="#000"
-                        app:layout_columnWeight="1" />
+                        app:layout_columnWeight="1"
+                        app:tint="#000" />
 
                     <ImageButton
                         android:id="@+id/button_filter"
@@ -167,9 +167,9 @@
                         android:contentDescription="Filter"
                         android:onClick="onShowFilterFragmentClick"
                         android:src="@drawable/ic_photo_filter"
-                        android:tint="#000"
                         android:visibility="gone"
-                        app:layout_columnWeight="1" />
+                        app:layout_columnWeight="1"
+                        app:tint="#000" />
 
                     <ImageButton
                         android:id="@+id/button_add_text"
@@ -285,10 +285,10 @@
                     android:layout_height="25dp"
                     android:layout_margin="10dp"
                     android:background="@null"
-                    android:tint="#fff"
                     android:src="@drawable/icon_check_vector"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#fff" />
 
                 <ImageButton
                     android:id="@+id/button_sticker_cancel"
@@ -297,10 +297,10 @@
                     android:layout_margin="10dp"
                     android:background="@null"
                     android:src="@drawable/icon_clear_vector"
-                    android:tint="#fff"
                     android:textColor="@android:color/white"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#fff" />
 
                 <ImageButton
                     android:id="@+id/button_sticker_delete"
@@ -309,10 +309,10 @@
                     android:layout_margin="10dp"
                     android:background="@null"
                     android:src="@drawable/trash_can_vector"
-                    android:tint="#F32013"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#F32013" />
 
                 <ImageView
                     android:id="@+id/sticker_image_view"

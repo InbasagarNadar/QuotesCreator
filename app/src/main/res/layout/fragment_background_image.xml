@@ -19,7 +19,8 @@
         android:padding="5dp"
         android:scaleType="centerInside"
         android:src="@drawable/trash_can_vector"
-        android:tint="#d00"
+        app:tint="#d00"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,7 +36,7 @@
         android:padding="5dp"
         android:scaleType="fitCenter"
         android:src="@drawable/gallery_vector"
-        android:tint="#000"
+        app:tint="#000"
         app:layout_constraintStart_toEndOf="@id/btn_remove_background"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,7 +52,7 @@
         android:padding="5dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_baseline_search_24"
-        android:tint="#000"
+        app:tint="#000"
         app:layout_constraintStart_toEndOf="@id/img_btn_gallery_background"
         app:layout_constraintTop_toTopOf="@id/img_btn_gallery_background" />
 

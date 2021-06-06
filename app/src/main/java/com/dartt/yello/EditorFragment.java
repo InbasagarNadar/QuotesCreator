@@ -92,6 +92,13 @@ public class EditorFragment extends Fragment {
                 touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
                 if (savedInstanceState != null) {
                     fromJSON(savedInstanceState.getString("json"));
+                    canvasLayoutChangeAction = new FunctionParameter() {
+                        @Override
+                        public void execute() {
+                            canvasLayoutChangeAction = null;
+                            touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
+                        }
+                    };
                 }
                 else {
                     /* Checking if image exists in intent, else setting default image*/
@@ -329,7 +336,7 @@ public class EditorFragment extends Fragment {
                 backgroundViewContainer.fillParent();
             }
             artBoardViewContainer.copyAttrFromJSON(jsonObject.getJSONObject("artBoard"));
-            //Toast.makeText(activity, "From JSON" + json.toString(), Toast.LENGTH_LONG).show();
+
             Log.e("EditorFragment", "Restored JSON : " + json);
         } catch (Exception e) {
             e.printStackTrace();

@@ -617,8 +617,6 @@ public class TextEditorFragment extends Fragment {
     public void edit(TextViewContainer textViewContainer) {
         activeTextViewContainer = textViewContainer;
         TextView text = textViewContainer.getView();
-        editText.setLetterSpacing(text.getLetterSpacing());
-        editText.setLineSpacing(0, text.getLineSpacingMultiplier());
         editText.setGravity(text.getGravity());
         editText.setTypeface(text.getTypeface());
         editText.setText(activeTextViewContainer.textContentOriginal);
@@ -632,7 +630,7 @@ public class TextEditorFragment extends Fragment {
         setEditorAlignment(text.getGravity());
         currentEditorFont = textViewContainer.fontHolder;
         fontSizeSeekBar.setProgress((int) Variables.pixelToDensity(activity, (int) textViewContainer.textSizePx) - FONT_SEEK_BAR_MIN);
-        letterSpacingSeekBar.setProgress((int) text.getLetterSpacing() * 50);
+        letterSpacingSeekBar.setProgress((int) (text.getLetterSpacing() * 50));
         lineSpacingSeekBar.setProgress((int) ((text.getLineSpacingMultiplier() - 1) * 50));
         show();
     }
@@ -814,8 +812,9 @@ public class TextEditorFragment extends Fragment {
         int selectionEnd = spannable.length();
 
         if (editText.hasSelection()) {
-            selectionStart = editText.getSelectionStart();
-            selectionEnd = editText.getSelectionEnd();
+            // Min - Max to fix keyboard selection in reverse direction
+            selectionStart = Math.min(editText.getSelectionStart(), editText.getSelectionEnd());
+            selectionEnd = Math.max(editText.getSelectionStart(), editText.getSelectionEnd());
         }
 
         CharacterStyle[] span = (CharacterStyle[]) spannable.getSpans(selectionStart, selectionEnd, spanHelper.getSpanClass());
