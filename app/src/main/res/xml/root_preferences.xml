@@ -17,4 +17,12 @@
         app:title="@string/preference_format"
         app:useSimpleSummaryProvider="true" />
 
+    <SwitchPreference
+        app:defaultValue="true"
+        app:icon="@drawable/ad_vector"
+        app:entries="@array/format_entries"
+        app:key="ad_enabled"
+        app:title="Advertisements"
+        app:useSimpleSummaryProvider="true" />
+
 </PreferenceScreen>

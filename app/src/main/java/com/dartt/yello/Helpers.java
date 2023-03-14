@@ -1,16 +1,13 @@
 package com.dartt.yello;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.Handler;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.util.SparseArray;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -554,8 +551,21 @@ interface CustomItemSelectListener {
 }
 
 class CustomHtml {
+
+    // Maybe replace the \n with <br>, then use the inbuilt Html.toHtml(), then replace &lt;br&gt; with <br/>
     public static String toHtml(Spannable text) {
-        final SpannableStringBuilder ssBuilder = new SpannableStringBuilder(text);
+        SpannableStringBuilder ssBuilder = new SpannableStringBuilder(text);
+        String str = text.toString();
+        int index = str.lastIndexOf("\n");
+        while (index >= 0) {
+            ssBuilder.replace(index, index + 1, "<br>");
+            index = str.lastIndexOf("\n", index - 1);
+        }
+
+        String html = Html.toHtml(ssBuilder);
+        html = html.substring(13, html.length() - 5);
+        return html.replace("&lt;", "<").replace("&gt;", ">");
+        /*final SpannableStringBuilder ssBuilder = new SpannableStringBuilder(text);
         int start, end;
 
         // Replace Style spans with <b></b> or <i></i>
@@ -592,6 +602,19 @@ class CustomHtml {
             finalString.append(ssBuilder);
         }
         else {
+            for (int i = foregroundSpans.length - 1; i >= 0; i--) {
+                ForegroundColorSpan span = foregroundSpans[i];
+                start = ssBuilder.getSpanStart(span);
+                end = ssBuilder.getSpanEnd(span);
+                String colorCode = Integer.toHexString(span.getForegroundColor()).substring(2);
+                String spanBegin = String.format("<span style=\"color:#%s;\">", colorCode);
+                ssBuilder.removeSpan(span);
+                ssBuilder.insert(end, "</span>");
+                ssBuilder.insert(start, spanBegin);
+
+            }
+            finalString.append(ssBuilder);
+            /*
             int lastSpanEnd = 0;
             for (int i = foregroundSpans.length - 1; i >= 0; i--) {
                 ForegroundColorSpan span = foregroundSpans[i];
@@ -620,19 +643,28 @@ class CustomHtml {
             }
             if (prevEnd < ssBuilder.length()) {
                 finalString.append(ssBuilder.subSequence(prevEnd, ssBuilder.length()));
-            }
-        }
+            }*/
+        //}
 
-        replace(finalString, '\n', "<br/>");
+        //replace(finalString, '\n', "<br/>");
 
-        return finalString.toString();
+        //return finalString.toString().replace("\n", "<br/>");
     }
-
+/*
     private static void replace(StringBuilder b, char oldChar, String newStr) {
         for (int i = b.length() - 1; i >= 0; i--) {
             if (b.charAt(i) == oldChar) {
                 b.replace(i, i + 1, newStr);
             }
         }
+    }*/
+}
+
+class Utilities {
+    public static void addToPos(int pos, Object jsonObj, JSONArray jsonArr) throws JSONException {
+        for (int i = jsonArr.length(); i > pos; i--) {
+            jsonArr.put(i, jsonArr.get(i - 1));
+        }
+        jsonArr.put(pos, jsonObj);
     }
 }

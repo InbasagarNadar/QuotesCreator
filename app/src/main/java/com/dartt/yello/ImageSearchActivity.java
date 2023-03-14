@@ -137,19 +137,16 @@ public class ImageSearchActivity extends AppCompatActivity {
         activeRequest = new StringRequest(
                 Request.Method.GET,
                 url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONArray hits = new JSONObject(response).getJSONArray("hits");
-                            imageAdapter.setData(hits);
-                            recyclerViewImageGrid.scrollToPosition(0);
-                            //cachedQueries.put(query, hits);
-                            loadingPanel.setVisibility(View.GONE);
-                            activeRequest = null;
-                        } catch (JSONException e) {
-                            Log.d(TAG, "Cannot parse to json");
-                        }
+                response -> {
+                    try {
+                        JSONArray hits = new JSONObject(response).getJSONArray("hits");
+                        imageAdapter.setData(hits);
+                        recyclerViewImageGrid.scrollToPosition(0);
+                        //cachedQueries.put(query, hits);
+                        loadingPanel.setVisibility(View.GONE);
+                        activeRequest = null;
+                    } catch (JSONException e) {
+                        Log.d(TAG, "Cannot parse to json");
                     }
                 }
                 , onErrorListener
@@ -165,28 +162,25 @@ public class ImageSearchActivity extends AppCompatActivity {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_view);
             imageView.setClipToOutline(true);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-                        ServerImageDialogFragment dialogFragment = ServerImageDialogFragment.newInstance(imageAdapter.data.getJSONObject(getAdapterPosition()).getString("largeImageURL"));
-                        dialogFragment.listener = new ServerImageDialogFragment.Listener() {
-                            @Override
-                            public void onImageSelected(String image_url) {
-                                Intent returnIntent = new Intent();
-                                returnIntent.putExtra("image_url", image_url);
-                                setResult(Activity.RESULT_OK, returnIntent);
-                                finish();
-                            }
+            imageView.setOnClickListener(view -> {
+                try {
+                    ServerImageDialogFragment dialogFragment = ServerImageDialogFragment.newInstance(imageAdapter.data.getJSONObject(getAdapterPosition()).getString("largeImageURL"));
+                    dialogFragment.listener = new ServerImageDialogFragment.Listener() {
+                        @Override
+                        public void onImageSelected(String image_url) {
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra("image_url", image_url);
+                            setResult(Activity.RESULT_OK, returnIntent);
+                            finish();
+                        }
 
-                            @Override
-                            public void onNothingSelected() {
-                            }
-                        };
-                        dialogFragment.show(getSupportFragmentManager(), "dialog");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                        @Override
+                        public void onNothingSelected() {
+                        }
+                    };
+                    dialogFragment.show(getSupportFragmentManager(), "dialog");
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             });
         }

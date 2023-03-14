@@ -1,9 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".TemplatesActivity">
+    android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".TemplatesActivity">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsing_toolbar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/sandal"
+                app:collapsedTitleTextAppearance="@style/toolbarStyleCollapsed"
+                app:contentScrim="@color/sandal"
+                app:expandedTitleTextAppearance="@style/toolbarStyleExpanded"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:scrimAnimationDuration="250"
+                app:scrimVisibleHeightTrigger="150dp"
+                app:title="Yello"
+                app:toolbarId="@+id/toolbar">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginEnd="50dp"
+                    android:src="@drawable/ic_yello_quotes_creator"
+                    app:layout_collapseMode="parallax" />
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/selectableItemBackground"
+                    app:contentInsetStartWithNavigation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_template"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/drawer"
+        android:layout_width="275dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+
+        app:headerLayout="@layout/layout_navigation_header">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="200dp">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="100dp"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/button_navigation_settings"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_settings_vector"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Settings" />
+
+                    <Button
+                        android:id="@+id/button_navigation_fonts"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_baseline_font_download_24"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Fonts/ Languages" />
+
+                    <Button
+                        android:id="@+id/button_navigation_rate_app"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_star"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Rate App" />
+
+                    <Button
+                        android:id="@+id/button_navigation_contact_us"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_contact_mail"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Contact Us" />
+
+                    <Button
+                        android:id="@+id/button_navigation_support_us"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_support_us"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Support Us" />
+
+                    <Button
+                        android:id="@+id/button_navigation_privacy_policy"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_privacy"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="Privacy Policy" />
+
+                    <Button
+                        android:id="@+id/button_faq"
+                        style="@style/NavigationBarButtonStyle"
+                        android:drawableStart="@drawable/ic_faq"
+                        android:onClick="OnNavigationItemClick"
+                        android:text="FAQ" />
+                </LinearLayout>
+            </ScrollView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <Button
+                    android:id="@+id/button_navigation_get_featured"
+                    style="@style/NavigationBarButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_quote"
+                    android:onClick="OnNavigationItemClick"
+                    android:text="Get Featured"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.gridlayout.widget.GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:paddingStart="75dp"
+                    android:paddingEnd="75dp"
+                    app:layout_constraintTop_toBottomOf="@id/button_navigation_get_featured">
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/button_navigation_instagram"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:onClick="OnNavigationItemClick"
+                        android:src="@drawable/ic_instagram"
+                        app:layout_columnWeight="1" />
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/button_navigation_facebook"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:onClick="OnNavigationItemClick"
+                        android:src="@drawable/ic_facebook"
+                        app:layout_columnWeight="1" />
+                </androidx.gridlayout.widget.GridLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.navigation.NavigationView>
+
+</androidx.drawerlayout.widget.DrawerLayout>

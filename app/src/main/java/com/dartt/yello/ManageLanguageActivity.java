@@ -1,7 +1,8 @@
 package com.dartt.yello;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -10,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -27,8 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class ManageLanguageActivity extends AppCompatActivity {
 
@@ -71,7 +69,7 @@ public class ManageLanguageActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             if (position == 0) {
                 holder.txtLanguageName.setText(LanguageManager.languages[position].name);
             }
@@ -92,52 +90,39 @@ public class ManageLanguageActivity extends AppCompatActivity {
                     holder.btnDownload.setVisibility(View.GONE);
                     holder.cbxEnabled.setVisibility(View.VISIBLE);
                     holder.cbxEnabled.setChecked(LanguageManager.languages[position].isActive(ManageLanguageActivity.this));
-                    holder.cbxEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            LanguageManager.languages[position].setActive(ManageLanguageActivity.this, isChecked);
-                        }
-                    });
+                    holder.cbxEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> LanguageManager.languages[position].setActive(ManageLanguageActivity.this, isChecked));
                     holder.btnDelete.setVisibility(View.VISIBLE);
-                    holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(ManageLanguageActivity.this)
-                                    .setMessage("Do you want to delete the fonts for the language " + LanguageManager.languages[position].name + "?")
-                                    .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            Log.d("Language", "Deleting " + LanguageManager.languages[position].code);
-                                            LanguageManager.languages[position].delete(ManageLanguageActivity.this);
-                                            notifyItemChanged(position);
-                                        }
-                                    })
-                                    .setNegativeButton("Cancel", null);
-                            builder.show();
-                        }
+                    holder.btnDelete.setOnClickListener(v -> {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ManageLanguageActivity.this)
+                                .setMessage("Do you want to delete the fonts for the language " + LanguageManager.languages[position].name + "?")
+                                .setPositiveButton("Delete", (dialog, id) -> {
+                                    Log.d("Language", "Deleting " + LanguageManager.languages[position].code);
+                                    LanguageManager.languages[position].delete(ManageLanguageActivity.this);
+                                    notifyItemChanged(position);
+                                })
+                                .setNegativeButton("Cancel", null);
+                        builder.show();
                     });
                 }
                 else {
                     holder.btnDelete.setVisibility(View.GONE);
                     holder.cbxEnabled.setVisibility(View.GONE);
                     holder.btnDownload.setVisibility(View.VISIBLE);
-                    holder.btnDownload.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            FragmentTransaction ft = ManageLanguageActivity.this.getSupportFragmentManager().beginTransaction();
-                            Fragment prev = ManageLanguageActivity.this.getSupportFragmentManager().findFragmentByTag("111");
-                            if (prev == null) {
-                                LanguageDownloadDialogFragment dialogFragment = LanguageDownloadDialogFragment.newInstance(position, new LanguageDownloadDialogFragment.Listener() {
-                                    @Override
-                                    public void onDismiss(int languageIndex, boolean installSuccess) {
-                                        if (installSuccess) {
-                                            notifyItemChanged(position);
-                                        }
+                    holder.btnDownload.setOnClickListener(v -> {
+                        FragmentTransaction ft = ManageLanguageActivity.this.getSupportFragmentManager().beginTransaction();
+                        Fragment prev = ManageLanguageActivity.this.getSupportFragmentManager().findFragmentByTag("111");
+                        if (prev == null) {
+                            LanguageDownloadDialogFragment dialogFragment = LanguageDownloadDialogFragment.newInstance(position, new LanguageDownloadDialogFragment.Listener() {
+                                @Override
+                                public void onDismiss(int languageIndex, boolean installSuccess) {
+                                    if (installSuccess) {
+                                        notifyItemChanged(position);
                                     }
-                                });
-                                dialogFragment.show(ft, "111");
-                            }
-                            Log.d("Language", "Downloading " + LanguageManager.languages[position].code);
+                                }
+                            });
+                            dialogFragment.show(ft, "111");
                         }
+                        Log.d("Language", "Downloading " + LanguageManager.languages[position].code);
                     });
                 }
             }
@@ -289,6 +274,10 @@ class LanguageManager {
         final static String Tamil = "tamil";
         final static String Malayalam = "malayalam";
         final static String Telugu = "telugu";
+        final static String Bengali = "bengali";
+        final static String Gurmukhi = "gurmukhi";
+        final static String Kannada = "kannada";
+        final static String Gujarati = "gujarati";
     }
 
     public static final int[] englishFontResourceId = {
@@ -399,10 +388,14 @@ class LanguageManager {
                     return fonts;
                 }
             },
+            new Lang("Bengali", "বাংলা", Codes.Bengali),
             new Lang("Devanagari", "देवनागरी", Codes.Devanagari),
-            new Lang("Tamil", "தமிழ்", Codes.Tamil),
+            new Lang("Gujarati", "ગુજરાતી", Codes.Gujarati),
+            new Lang("Gurmukhi", "ਗੁਰਮੁਖੀ", Codes.Gurmukhi),
+            new Lang("Kannada", "ಕನ್ನಡ", Codes.Kannada),
             new Lang("Malayalam", "മലയാളം", Codes.Malayalam),
-            new Lang("Telugu", "తెలుగు", Codes.Telugu)
+            new Lang("Tamil", "தமிழ்", Codes.Tamil),
+            new Lang("Telugu", "తెలుగు", Codes.Telugu),
     };
 
     static boolean isLanguageDownloaded(Context context, String code) {
@@ -433,6 +426,18 @@ class LanguageManager {
         }
         else if (characterLanguage == Character.UnicodeBlock.TELUGU) {
             languageCode = Codes.Telugu;
+        }
+        else if(characterLanguage == Character.UnicodeBlock.BENGALI) {
+            languageCode = Codes.Bengali;
+        }
+        else if(characterLanguage == Character.UnicodeBlock.GURMUKHI){
+            languageCode = Codes.Gurmukhi;
+        }
+        else if(characterLanguage == Character.UnicodeBlock.KANNADA){
+            languageCode = Codes.Kannada;
+        }
+        else if(characterLanguage == Character.UnicodeBlock.GUJARATI){
+            languageCode = Codes.Gujarati;
         }
         return languageCode;
     }

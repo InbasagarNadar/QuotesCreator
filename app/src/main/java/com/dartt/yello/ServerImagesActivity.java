@@ -21,8 +21,6 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -76,33 +74,27 @@ public class ServerImagesActivity extends AppCompatActivity {
         loadingOverlay.setVisibility(View.VISIBLE);
         request = new StringRequest(
                 CATEGORIES_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject json = new JSONObject(response);
-                            if (json.getString("response").equals("OK")) {
-                                categoriesAdapter = new ServerImageCategoriesAdapter(ServerImagesActivity.this, json.getJSONArray("categories"));
-                                categoryRecyclerView.setAdapter(categoriesAdapter);
-                            }
+                response -> {
+                    try {
+                        JSONObject json = new JSONObject(response);
+                        if (json.getString("response").equals("OK")) {
+                            categoriesAdapter = new ServerImageCategoriesAdapter(ServerImagesActivity.this, json.getJSONArray("categories"));
+                            categoryRecyclerView.setAdapter(categoriesAdapter);
                         }
-                        catch (JSONException e) {
-                            Toast.makeText(ServerImagesActivity.this, "Invalid Response from server", Toast.LENGTH_LONG).show();
-                            Log.e(TAG, "Response cannot be converted to json " + e.getMessage());
-                            e.printStackTrace();
-                        }
-                        loadingOverlay.setVisibility(View.GONE);
                     }
+                    catch (JSONException e) {
+                        Toast.makeText(ServerImagesActivity.this, "Invalid Response from server", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Response cannot be converted to json " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                    loadingOverlay.setVisibility(View.GONE);
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(ServerImagesActivity.this, "Network Error", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Volley Error " + error.getMessage());
-                        error.printStackTrace();
-                        loadingOverlay.setVisibility(View.GONE);
-                        categoryRetryPanel.setVisibility(View.VISIBLE);
-                    }
+                error -> {
+                    Toast.makeText(ServerImagesActivity.this, "Network Error", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Volley Error " + error.getMessage());
+                    error.printStackTrace();
+                    loadingOverlay.setVisibility(View.GONE);
+                    categoryRetryPanel.setVisibility(View.VISIBLE);
                 }
         );
         requestQueue.add(request);
@@ -136,34 +128,28 @@ public class ServerImagesActivity extends AppCompatActivity {
         request = new StringRequest(
                 Request.Method.POST,
                 IMAGES_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject json = new JSONObject(response);
-                            if (json.getString("response").equals("OK")) {
-                                imageAdapter = new ServerImageAdapter(ServerImagesActivity.this, json.getJSONArray("data"));
-                                imageRecyclerView.setAdapter(imageAdapter);
-                                imageRecyclerView.setVisibility(View.VISIBLE);
-                                categoryRecyclerView.setVisibility(View.GONE);
-                                Log.e(TAG, "Success");
-                            }
-                        } catch (JSONException e) {
-                            Toast.makeText(ServerImagesActivity.this, "Invalid Response from server", Toast.LENGTH_LONG).show();
-                            Log.e(TAG, "Response cannot be converted to json " + e.getMessage() + "\n response:" + response);
-                            e.printStackTrace();
+                response -> {
+                    try {
+                        JSONObject json = new JSONObject(response);
+                        if (json.getString("response").equals("OK")) {
+                            imageAdapter = new ServerImageAdapter(ServerImagesActivity.this, json.getJSONArray("data"));
+                            imageRecyclerView.setAdapter(imageAdapter);
+                            imageRecyclerView.setVisibility(View.VISIBLE);
+                            categoryRecyclerView.setVisibility(View.GONE);
+                            Log.e(TAG, "Success");
                         }
-                        loadingOverlay.setVisibility(View.GONE);
+                    } catch (JSONException e) {
+                        Toast.makeText(ServerImagesActivity.this, "Invalid Response from server", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Response cannot be converted to json " + e.getMessage() + "\n response:" + response);
+                        e.printStackTrace();
                     }
+                    loadingOverlay.setVisibility(View.GONE);
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(ServerImagesActivity.this, "Network Error", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Volley Error " + error.getMessage());
-                        error.printStackTrace();
-                        loadingOverlay.setVisibility(View.GONE);
-                    }
+                error -> {
+                    Toast.makeText(ServerImagesActivity.this, "Network Error", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Volley Error " + error.getMessage());
+                    error.printStackTrace();
+                    loadingOverlay.setVisibility(View.GONE);
                 }
         ) {
             @Override
@@ -191,29 +177,26 @@ public class ServerImagesActivity extends AppCompatActivity {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_view);
             imageView.setClipToOutline(true);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-                        ServerImageDialogFragment dialogFragment = ServerImageDialogFragment.newInstance(HOST + imageAdapter.data.getJSONArray(getAdapterPosition()).getString(0));
-                        dialogFragment.listener = new ServerImageDialogFragment.Listener() {
-                            @Override
-                            public void onImageSelected(String image_url) {
-                                Intent returnIntent = new Intent();
-                                returnIntent.putExtra("image_url", image_url);
-                                setResult(Activity.RESULT_OK, returnIntent);
-                                finish();
-                            }
+            imageView.setOnClickListener(view -> {
+                try {
+                    ServerImageDialogFragment dialogFragment = ServerImageDialogFragment.newInstance(HOST + imageAdapter.data.getJSONArray(getAdapterPosition()).getString(0));
+                    dialogFragment.listener = new ServerImageDialogFragment.Listener() {
+                        @Override
+                        public void onImageSelected(String image_url) {
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra("image_url", image_url);
+                            setResult(Activity.RESULT_OK, returnIntent);
+                            finish();
+                        }
 
-                            @Override
-                            public void onNothingSelected() {
-                            }
-                        };
-                        dialogFragment.show(getSupportFragmentManager(), "dialog");
-                    }
-                    catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                        @Override
+                        public void onNothingSelected() {
+                        }
+                    };
+                    dialogFragment.show(getSupportFragmentManager(), "dialog");
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
                 }
             });
         }
@@ -265,15 +248,12 @@ public class ServerImagesActivity extends AppCompatActivity {
             categoryImageButton = itemView.findViewById(R.id.category_image);
             categoryLabelTextView = itemView.findViewById(R.id.category_label);
             categoryImageButton.setClipToOutline(true);
-            categoryImageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-                        int categoryId = categoriesAdapter.data.getJSONObject(getAdapterPosition()).getInt("category_id");
-                        requestImageByCategory(categoryId);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+            categoryImageButton.setOnClickListener(view -> {
+                try {
+                    int categoryId = categoriesAdapter.data.getJSONObject(getAdapterPosition()).getInt("category_id");
+                    requestImageByCategory(categoryId);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             });
         }

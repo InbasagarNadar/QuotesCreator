@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -14,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -46,7 +47,17 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.signature.ObjectKey;
+import com.dartt.yello.databinding.ActivitySaveBinding;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 
@@ -61,7 +72,6 @@ import java.util.List;
 public class SaveActivity extends AppCompatActivity {
 
 
-    public static Bitmap bitmap;
     ConstraintLayout filterStrengthParent;
     SparseArray<Bitmap> bitmapSparseArray = new SparseArray<>();
     int[] filterStrengths;
@@ -89,19 +99,68 @@ public class SaveActivity extends AppCompatActivity {
 
     private String mimeType = "image/png";
 
-    @SuppressLint("ClickableViewAccessibility")
+    ActivitySaveBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_save);
+        binding = ActivitySaveBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        initViews();
+        initExportFormat();
+        initWatermarkRewardedAd();
+
+        // TODO show progress bar. Using signature method to invalidate cache set by previous save I guess
+        Glide.with(this).load(getFilesDir() + "/export.png").signature(new ObjectKey(System.currentTimeMillis())).into(new CustomTarget<Drawable>() {
+            @Override
+            public void onResourceReady(@NonNull Drawable resource, @Nullable @org.jetbrains.annotations.Nullable Transition<? super Drawable> transition) {
+                onImageLoaded(resource);
+            }
+
+            @Override
+            public void onLoadCleared(@Nullable @org.jetbrains.annotations.Nullable Drawable placeholder) {
+                originalImageView.setImageDrawable(null);
+            }
+        });
+    }
+
+    private void initExportFormat() {
+        fileExtension = PreferenceManager.getDefaultSharedPreferences(this).getString("export_format", "png");
+        if (fileExtension.equals("png")) {
+            compressFormat = Bitmap.CompressFormat.PNG;
+            mimeType = "image/png";
+        }
+        else {
+            compressFormat = Bitmap.CompressFormat.JPEG;
+            mimeType = "image/jpeg";
+        }
+    }
+
+    private void initViews() {
         originalImageView = findViewById(R.id.image_view);
         filterImageView = findViewById(R.id.filter_image_view);
         watermarkImageButton = findViewById(R.id.watermark_image_button);
         filterStrengthSeekBar = findViewById(R.id.seek_bar_filter_strength);
         filterStrengthParent = findViewById(R.id.filter_strength_parent);
+    }
 
-        originalImage = bitmap;
+    private void onImageLoaded(Drawable drawable) {
+        originalImage = ((BitmapDrawable) drawable).getBitmap();
         originalThumbnail = getResizedBitmap(originalImage, 256);
+        originalImageView.setImageBitmap(originalImage);
+        initFilter();
+        final ViewTreeObserver viewTreeObserver = originalImageView.getViewTreeObserver();
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                originalImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                setWatermarkButtonDimension();
+            }
+        });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void initFilter() {
         filterPack = FilterPack.getFilterPack(this);
         filterPack.add(0, null);
         filterStrengths = new int[filterPack.size()];
@@ -117,53 +176,29 @@ public class SaveActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
 
-        filterImageView.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getPointerCount() == 1) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                        filterImageView.setVisibility(View.VISIBLE);
-                    } else {
-                        filterImageView.setVisibility(View.GONE);
-                    }
+        // Hide filter when pressing on image
+        filterImageView.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getPointerCount() == 1) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    filterImageView.setVisibility(View.VISIBLE);
                 }
-                return true;
+                else {
+                    filterImageView.setVisibility(View.GONE);
+                }
             }
+            return true;
         });
-        originalImageView.setImageBitmap(originalImage);
         RecyclerView filterListView = findViewById(R.id.filter_recycler_view);
         filterListView.setAdapter(new FilterThumbnailAdapter(filterPack, originalThumbnail));
         filterListView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         clearFilter();
-
-        final ViewTreeObserver viewTreeObserver = originalImageView.getViewTreeObserver();
-        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                originalImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                setWatermarkButtonDimension();
-            }
-        });
-        initWatermarkRewardedAd();
-
-        fileExtension = PreferenceManager.getDefaultSharedPreferences(this).getString("export_format", "png");
-        if (fileExtension.equals("png")) {
-            compressFormat = Bitmap.CompressFormat.PNG;
-            mimeType = "image/png";
-        } else {
-            compressFormat = Bitmap.CompressFormat.JPEG;
-            mimeType = "image/jpeg";
-        }
     }
 
     public void clearFilter() {
@@ -180,17 +215,20 @@ public class SaveActivity extends AppCompatActivity {
                 if (savedPath == null) {
                     savedPath = saveBitmap();
                     Toast.makeText(this, "Saved at " + savedPath, Toast.LENGTH_LONG).show();
-                } else {
+                }
+                else {
                     if (!new File(savedPath).exists()) {
                         savedPath = saveBitmap();
-                    } else {
+                    }
+                    else {
                         Toast.makeText(this, "Already saved at " + savedPath, Toast.LENGTH_LONG).show();
                     }
                 }
             } catch (IOException e) {
                 Toast.makeText(this, "Something went wrong. " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
-        } else {
+        }
+        else {
             requestStoragePermission(REQUEST_CODE_SAVE);
         }
     }
@@ -204,14 +242,14 @@ public class SaveActivity extends AppCompatActivity {
                     if (!file.exists()) {
                         savedPath = saveBitmap();
                     }
-                } else {
+                }
+                else {
                     savedPath = saveBitmap();
                 }
                 file = new File(savedPath);
 
                 Uri myImageFileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".FileProvider", file);
 
-                //create a intent
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.putExtra(Intent.EXTRA_STREAM, myImageFileUri);
@@ -230,99 +268,98 @@ public class SaveActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        } else {
+        }
+        else {
             requestStoragePermission(REQUEST_CODE_SHARE);
         }
     }
 
     public void onRemoveWatermarkClick(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if (!watermarkRemoved) {
             /*if (!watermarkRewardedAd.isLoaded()) {
                 //initWatermarkRewardedAd();
             }*/
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Remove Watermark")
                     .setMessage("We'll now show a short ad. Please watch the full ad to remove watermark.")
-                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            /*try {
-                                if (watermarkRewardedAd.isLoaded()) {
-                                    watermarkRewardedAd.show(SaveActivity.this, new RewardedAdCallback() {
-                                        @Override
-                                        public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                                            Toast.makeText(SaveActivity.this, "Watermark Removed", Toast.LENGTH_LONG).show();
-                                            watermarkRemoved = true;
-                                            watermarkImageButton.setVisibility(View.GONE);
-                                            savedPath = null;
-                                        }
-
-                                        @Override
-                                        public void onRewardedAdClosed() {
-                                            if (!watermarkRemoved) {
-                                                initWatermarkRewardedAd();
-                                            }
-                                            watermarkRemoved = true;
-                                            watermarkImageButton.setVisibility(View.GONE);
-                                            savedPath = null;
-                                        }
-                                    });
-                                } else {
-                                    Toast.makeText(SaveActivity.this, "Failed to Load Ad. Please Try again later.", Toast.LENGTH_SHORT).show();
-                                    if (!watermarkRewardedAd.isLoaded()) {
-                                        initWatermarkRewardedAd();
-                                    }
-                                    watermarkRemoved = true;
-                                    watermarkImageButton.setVisibility(View.GONE);
-                                    savedPath = null;
-
+                    .setPositiveButton("Okay", (dialog, id) -> {
+                        if(watermarkRewardedAd != null){
+                            watermarkRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                @Override
+                                public void onAdClicked() {
+                                    // Called when a click is recorded for an ad.
+                                    // Log.d(TAG, "Ad was clicked.");
                                 }
-                            } catch (Exception e) {
-                                Log.e("ADMOB", e.toString());*/
+
+                                @Override
+                                public void onAdDismissedFullScreenContent() {
+                                    // Called when ad is dismissed.
+                                    // Set the ad reference to null so you don't show the ad a second time.
+                                    // Log.d(TAG, "Ad dismissed fullscreen content.");
+                                    watermarkRewardedAd = null;
+                                }
+
+                                @Override
+                                public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                    // Called when ad fails to show.
+                                    // Log.e(TAG, "Ad failed to show fullscreen content.");
+                                    watermarkRewardedAd = null;
+                                }
+
+                                @Override
+                                public void onAdImpression() {
+                                    // Called when an impression is recorded for an ad.
+                                    // Log.d(TAG, "Ad recorded an impression.");
+                                }
+
+                                @Override
+                                public void onAdShowedFullScreenContent() {
+                                    // Called when ad is shown.
+                                    // Log.d(TAG, "Ad showed fullscreen content.");
+                                }
+                            });
+                            watermarkRewardedAd.show(this, rewardItem -> {
                                 watermarkRemoved = true;
                                 watermarkImageButton.setVisibility(View.GONE);
                                 savedPath = null;
-                            //}
+                                watermarkRewardedAd = null;
+                            });
+                        }
+                        else{
+                            watermarkRemoved = true;
+                            watermarkImageButton.setVisibility(View.GONE);
+                            savedPath = null;
                         }
                     })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
             AlertDialog alert = builder.create();
             alert.show();
-        } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("You have already removed watermark.")
-                    .setCancelable(false)
-                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-            AlertDialog alert = builder.create();
-            alert.show();
+        }
+        else {
+            Toast.makeText(this, "You have already removed watermark.", Toast.LENGTH_LONG).show();
         }
     }
 
     void initWatermarkRewardedAd() {
-        /*try {
-            watermarkRewardedAd = new RewardedAd(this, getString(R.string.ad_unit_remove_watermark));
-            RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
+        try {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            String adUnit = getString(R.string.ad_unit_remove_watermark);
+            RewardedAdLoadCallback callback = new RewardedAdLoadCallback() {
                 @Override
-                public void onRewardedAdLoaded() {
-                    Log.e("AD", "Watermark Ad Loaded.");
+                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                    Log.d("Admob", loadAdError.toString());
+                    watermarkRewardedAd = null;
                 }
 
                 @Override
-                public void onRewardedAdFailedToLoad(LoadAdError adError) {
-                    Log.e("AD", "Watermark Ad failed to load");
+                public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                    watermarkRewardedAd = rewardedAd;
                 }
             };
-            watermarkRewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+            RewardedAd.load(this, adUnit, adRequest, callback);
         } catch (Exception e) {
-            Log.e("ADMOB", e.toString());
-        }*/
+            Log.e("Admob", "Try Catch: " + e);
+        }
     }
 
     final String IMAGES_FOLDER_NAME = "Yello";
@@ -368,10 +405,12 @@ public class SaveActivity extends AppCompatActivity {
         Bitmap resultBitmap = originalImage.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(resultBitmap);
 
+        // Check if filter is selected, then apply filter
         if (currentFilterIndex != 0) {
             Paint alphaPaint = new Paint();
             alphaPaint.setAlpha((int) ((float) filterStrengths[currentFilterIndex] / (float) filterStrengthSeekBar.getMax() * 255));
-            Bitmap filterBitmap = filterPack.get(currentFilterIndex).processFilter(bitmap.copy(Bitmap.Config.ARGB_8888, true));
+            // TODO check if originalImage static thing messed up something
+            Bitmap filterBitmap = filterPack.get(currentFilterIndex).processFilter(originalImage.copy(Bitmap.Config.ARGB_8888, true));
             canvas.drawBitmap(filterBitmap, 0, 0, alphaPaint);
         }
         if (!watermarkRemoved) {
@@ -391,7 +430,8 @@ public class SaveActivity extends AppCompatActivity {
             Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
             fos = resolver.openOutputStream(imageUri);
             path = getRealPathFromURI(this, imageUri);
-        } else {
+        }
+        else {
             String imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString() + File.separator + IMAGES_FOLDER_NAME;
             File fileDirectory = new File(imagesDir);
             if (!fileDirectory.exists()) {
@@ -416,9 +456,7 @@ public class SaveActivity extends AppCompatActivity {
     }
 
     void requestStoragePermission(int requestCode) {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                requestCode);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
     }
 
     @Override
@@ -460,7 +498,8 @@ public class SaveActivity extends AppCompatActivity {
         if (bitmapRatio > 1) {
             width = maxSize;
             height = (int) (width / bitmapRatio);
-        } else {
+        }
+        else {
             height = maxSize;
             width = (int) (height * bitmapRatio);
         }
@@ -494,51 +533,45 @@ public class SaveActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull FilterThumbnailViewHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull FilterThumbnailViewHolder holder, @SuppressLint("RecyclerView") final int position) {
             final int filterIndex = position;
             if (position == 0) {
                 holder.title.setText("Default");
                 holder.imageButton.setImageBitmap(thumbnail);
-                holder.imageButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (currentFilterIndex != 0) {
-                            savedPath = null;
-                        }
-                        notifyItemChanged(currentFilterIndex);
-                        notifyItemChanged(0);
-                        clearFilter();
-                        currentFilterIndex = 0;
-                        filterStrengthParent.setVisibility(View.INVISIBLE);
+                holder.imageButton.setOnClickListener(view -> {
+                    if (currentFilterIndex != 0) {
+                        savedPath = null;
                     }
+                    notifyItemChanged(currentFilterIndex);
+                    notifyItemChanged(0);
+                    clearFilter();
+                    currentFilterIndex = 0;
+                    filterStrengthParent.setVisibility(View.INVISIBLE);
                 });
             }
             else {
                 holder.title.setText(filters.get(position).getName());
                 final ImageButton button = holder.imageButton.findViewById(R.id.filter_thumb);
                 button.setImageBitmap(filters.get(position).processFilter(thumbnail.copy(Bitmap.Config.ARGB_8888, true)));
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (currentFilterIndex == filterIndex) {
-                            //showFilterStrengthPanel(filterStrengths[filterIndex]);
+                button.setOnClickListener(view -> {
+                    if (currentFilterIndex == filterIndex) {
+                        //showFilterStrengthPanel(filterStrengths[filterIndex]);
+                    }
+                    else {
+                        Bitmap filteredBitmap = bitmapSparseArray.get(filterIndex);
+                        if (filteredBitmap == null) {
+                            filteredBitmap = filterPack.get(filterIndex).processFilter(originalImage.copy(Bitmap.Config.ARGB_8888, true));
+                            bitmapSparseArray.put(filterIndex, filteredBitmap);
                         }
-                        else {
-                            Bitmap filteredBitmap = bitmapSparseArray.get(filterIndex);
-                            if (filteredBitmap == null) {
-                                filteredBitmap = filterPack.get(filterIndex).processFilter(originalImage.copy(Bitmap.Config.ARGB_8888, true));
-                                bitmapSparseArray.put(filterIndex, filteredBitmap);
-                            }
-                            filterImageView.setImageBitmap(filteredBitmap);
-                            filterImageView.setAlpha(filterStrengths[filterIndex] / (float) filterStrengthSeekBar.getMax());
-                            notifyItemChanged(currentFilterIndex);
-                            notifyItemChanged(position);
-                            currentFilterIndex = filterIndex;
-                            filterStrengthSeekBar.setProgress(filterStrengths[filterIndex]);
-                            filterStrengthParent.setVisibility(View.VISIBLE);
-                            savedPath = null;
-                            //setSelectedFilterButton(index + 1);
-                        }
+                        filterImageView.setImageBitmap(filteredBitmap);
+                        filterImageView.setAlpha(filterStrengths[filterIndex] / (float) filterStrengthSeekBar.getMax());
+                        notifyItemChanged(currentFilterIndex);
+                        notifyItemChanged(position);
+                        currentFilterIndex = filterIndex;
+                        filterStrengthSeekBar.setProgress(filterStrengths[filterIndex]);
+                        filterStrengthParent.setVisibility(View.VISIBLE);
+                        savedPath = null;
+                        //setSelectedFilterButton(index + 1);
                     }
                 });
             }

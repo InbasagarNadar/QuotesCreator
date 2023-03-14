@@ -3,15 +3,17 @@
 
     <string name="navigation_drawer_open">open</string>
     <string name="navigation_drawer_close">close</string>
+
     <string name="ad_unit_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="ad_unit_test_reward">ca-app-pub-3940256099942544/5224354917</string>
 
-    <!--string name="ad_unit_support_us">@string/ad_unit_test</string>
-    <string name="ad_unit_remove_watermark">@string/ad_unit_test</string>
-    <string name="ad_unit_banner">@string/ad_unit_test</string-->
+    <string name="ad_unit_support_us">@string/ad_unit_test_reward</string>
+    <string name="ad_unit_remove_watermark">@string/ad_unit_test_reward</string>
+    <string name="ad_unit_banner">@string/ad_unit_test</string>
 
-    <string name="ad_unit_support_us">ca-app-pub-5247639520001397/3162561876</string>
-    <string name="ad_unit_remove_watermark">ca-app-pub-5247639520001397/3964507658</string>
-    <string name="ad_unit_banner">ca-app-pub-5247639520001397/8883568518</string>
+<!--    <string name="ad_unit_support_us">ca-app-pub-5247639520001397/3162561876</string>-->
+<!--    <string name="ad_unit_remove_watermark">ca-app-pub-5247639520001397/3964507658</string>-->
+<!--    <string name="ad_unit_banner">ca-app-pub-5247639520001397/8883568518</string>-->
 
     <string name="title_activity_settings">SettingsActivity</string>
 

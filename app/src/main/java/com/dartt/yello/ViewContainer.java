@@ -29,6 +29,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.signature.ObjectKey;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -292,7 +293,7 @@ class ImageViewContainer extends ViewContainer {
         currentBackgroundType = BACKGROUND_TYPE_URL;
         currentBackgroundUrl = url;
         //resetFilter();
-        Glide.with(getView()).load(url).into(target);
+        Glide.with(getView()).load(url).signature(new ObjectKey(System.currentTimeMillis())).into(target);
     }
 
     void setDrawable(Drawable resource) {
@@ -496,8 +497,8 @@ class TextViewContainer extends ViewContainer {
             jsonObject.put("fontName", fontHolder.name);
             jsonObject.put("textSizePx", textSizePx);
             jsonObject.put("textHighlightColor", ((ColorDrawable) textView.getBackground()).getColor());
-            jsonObject.put("textContentOriginal", CustomHtml.toHtml(textContentOriginal));
-            jsonObject.put("textViewContent", CustomHtml.toHtml(new SpannableStringBuilder(textView.getText())));
+            jsonObject.put("textContentOriginal", CustomHtml.toHtml(textContentOriginal)); //idk why i am calling toHtml here
+            jsonObject.put("textViewContent", CustomHtml.toHtml(new SpannableStringBuilder(textView.getText()))); // this one makes sense doh
             jsonObject.put("lineSpacing", textView.getLineSpacingMultiplier());
             jsonObject.put("letterSpacing", textView.getLetterSpacing());
         }
@@ -548,18 +549,15 @@ class ArtBoardViewContainer extends ViewContainer {
     ArtBoardViewContainer(final View view) {
         this.view = view;
         final ViewTreeObserver viewTreeObserver = view.getViewTreeObserver();
-        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (shiftChildren) {
-                    shiftChildren(oldLeft);
-                    oldLeft = ArtBoardViewContainer.this.view.getLeft();
-                    if (delegate != null) {
-                        delegate.execute();
-                        delegate = null;
-                    }
-                    shiftChildren = false;
+        viewTreeObserver.addOnGlobalLayoutListener(() -> {
+            if (shiftChildren) {
+                shiftChildren(oldLeft);
+                oldLeft = ArtBoardViewContainer.this.view.getLeft();
+                if (delegate != null) {
+                    delegate.execute();
+                    delegate = null;
                 }
+                shiftChildren = false;
             }
         });
     }

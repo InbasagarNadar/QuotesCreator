@@ -1,7 +1,8 @@
 package com.dartt.yello;
 
 
-import android.content.DialogInterface;
+import static android.app.Activity.RESULT_OK;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -24,8 +25,6 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-
-import static android.app.Activity.RESULT_OK;
 
 public class BackgroundImageFragment extends Fragment implements View.OnClickListener {
 
@@ -73,13 +72,10 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             button.setLayoutParams(params);
             backgroundImageButtonList.addView(button);
 
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //activity.Background.loadImageFromResource(imageId);
-                    activity.setEditorBackground(imageId);
-                    btnRemoveBackground.setVisibility(View.VISIBLE);
-                }
+            button.setOnClickListener(view -> {
+                //activity.Background.loadImageFromResource(imageId);
+                activity.setEditorBackground(imageId);
+                btnRemoveBackground.setVisibility(View.VISIBLE);
             });
         }
         /*View buttonShowInternetImagePicker = fragment.findViewById(R.id.button_show_internet_image_picker);
@@ -89,6 +85,10 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
         fragment.findViewById(R.id.img_btn_gallery_background).setOnClickListener(this);
         fragment.findViewById(R.id.btn_remove_background).setOnClickListener(this);
         fragment.findViewById(R.id.button_show_internet_image_picker).setOnClickListener(this);
+
+        /*if(activity.editorFragment.backgroundViewContainer.currentBackgroundType != ImageViewContainer.BACKGROUND_TYPE_NULL){
+            btnRemoveBackground.setVisibility(View.VISIBLE);
+        }*/
 
         if (savedInstanceState != null) {
             horizontalScrollView.setScrollX(savedInstanceState.getInt("horizontal_scroll"));
@@ -131,11 +131,7 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setMessage("Please grant storage permission to import image from gallery")
-                        .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                StorageHelper.requestStoragePermission(activity, 0);
-                            }
-                        });
+                        .setPositiveButton("Okay", (dialog, id1) -> StorageHelper.requestStoragePermission(activity, 0));
                 AlertDialog alert = builder.create();
                 alert.show();
             }

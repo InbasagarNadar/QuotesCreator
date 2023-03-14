@@ -60,17 +60,14 @@ class TypefaceAdapter extends RecyclerView.Adapter<TypefaceAdapter.FontViewHolde
         view.setTypeface(fonts[position].typeface);
         view.setText(fonts[position].name);
         if (onItemSelectedListener != null) {
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (currentFontIndex >= 0) {
-                        notifyItemChanged(currentFontIndex);
-                    }
-                    currentFontIndex = position;
-                    view.setTextColor(0xFFFFBF00);
-                    selectedFont = fonts[position];
-                    onItemSelectedListener.onItemSelected(selectedFont);
+            view.setOnClickListener(v -> {
+                if (currentFontIndex >= 0) {
+                    notifyItemChanged(currentFontIndex);
                 }
+                currentFontIndex = position;
+                view.setTextColor(0xFFFFBF00);
+                selectedFont = fonts[position];
+                onItemSelectedListener.onItemSelected(selectedFont);
             });
         }
         if (currentFontIndex == position) {

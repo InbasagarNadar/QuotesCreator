@@ -1,6 +1,8 @@
 package com.dartt.yello;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +24,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class BackgroundColorFragment extends Fragment implements View.OnClickListener {
 
     final String COLOR_DIALOG = "color_dialog";
@@ -39,24 +44,15 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
 
     CreateBackgroundActivity activity;
 
-    ColorDialogFragment.Listener colorDialogListener = new ColorDialogFragment.Listener() {
-        @Override
-        public void onColorSelected(int color) {
-            activity.undo.addState(new ColorChangeState(Variables.currentColor, color));
-            setArtBoardFill(color);
-        }
+    ColorDialogFragment.Listener colorDialogListener = (color) -> {
+        activity.undo.addState(new ColorChangeState(Variables.currentColor, color));
+        setArtBoardFill(color);
     };
 
-    GradientDialogFragment.Listener gradientDialogListener = new GradientDialogFragment.Listener() {
-        @Override
-        public void onGradientSelected(int[] gradient, GradientDrawable.Orientation orientation) {
-            setArtBoardFill(gradient, orientation);
-        }
-    };
+    GradientDialogFragment.Listener gradientDialogListener = this::setArtBoardFill;
 
     public BackgroundColorFragment() {
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,6 +70,20 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
 
         backgroundFillSelectAdapter = new BackgroundFillSelectAdapter(activity);
         fillTypeSpinner.setAdapter(backgroundFillSelectAdapter);
+
+        Intent intent = activity.getIntent();
+        if (intent.hasExtra("draft_key")) {
+            String draftKey = intent.getStringExtra("draft_key");
+            SharedPreferences sharedPref = activity.getSharedPreferences("drafts", Context.MODE_PRIVATE);
+            try {
+                JSONObject draft = new JSONObject(sharedPref.getString(draftKey, "{}"));
+                fillTypeSpinner.setSelection(draft.getJSONObject("editable_json").getJSONObject("artBoard").getInt("fillType"));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
         fillTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -116,12 +126,9 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
             params.leftMargin = _5dp;
             button.setLayoutParams(params);
             colorButtonList.addView(button);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    activity.undo.addState(new ColorChangeState(Variables.currentColor, color));
-                    setArtBoardFill(color);
-                }
+            button.setOnClickListener(view -> {
+                activity.undo.addState(new ColorChangeState(Variables.currentColor, color));
+                setArtBoardFill(color);
             });
         }
 
@@ -130,13 +137,10 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
             Button button = new Button(activity);
             final int[] gradient = Variables.Gradients[i];
             final GradientDrawable.Orientation gradientOrientation = Variables.GradientsOrientation[i];
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (activity != null) {
-                        activity.undo.addState(new ColorChangeState(Variables.currentGradient, Variables.currentGradientOrientation, gradient, gradientOrientation));
-                        setArtBoardFill(gradient, gradientOrientation);
-                    }
+            button.setOnClickListener(view -> {
+                if (activity != null) {
+                    activity.undo.addState(new ColorChangeState(Variables.currentGradient, Variables.currentGradientOrientation, gradient, gradientOrientation));
+                    setArtBoardFill(gradient, gradientOrientation);
                 }
             });
             button.setBackground(Variables.newGradientDrawable(activity, gradient, gradientOrientation, Variables.CORNER_DP));
@@ -175,16 +179,14 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
                 dialogFragment.show(ft, COLOR_DIALOG);
             }
 
-        } else if (id == R.id.img_btn_pick_art_board_gradient) {
+        }
+        else if (id == R.id.img_btn_pick_art_board_gradient) {
             Fragment prev = activity.getSupportFragmentManager().findFragmentByTag(GRADIENT_DIALOG);
             if (prev == null) {
                 GradientDialogFragment dialogFragment = new GradientDialogFragment();
-                dialogFragment.listener = new GradientDialogFragment.Listener() {
-                    @Override
-                    public void onGradientSelected(int[] gradient, GradientDrawable.Orientation gradientOrientation) {
-                        activity.undo.addState(new ColorChangeState(Variables.currentGradient, Variables.currentGradientOrientation, gradient, gradientOrientation));
-                        setArtBoardFill(gradient, gradientOrientation);
-                    }
+                dialogFragment.listener = (gradient, gradientOrientation) -> {
+                    activity.undo.addState(new ColorChangeState(Variables.currentGradient, Variables.currentGradientOrientation, gradient, gradientOrientation));
+                    setArtBoardFill(gradient, gradientOrientation);
                 };
                 dialogFragment.setCancelable(false);
                 dialogFragment.show(ft, GRADIENT_DIALOG);
@@ -253,12 +255,15 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
         public void undo() {
             if (actionType == TYPE_COLOR_COLOR) {
                 setArtBoardFill(oldColor);
-            } else if (actionType == TYPE_GRADIENT_GRADIENT) {
+            }
+            else if (actionType == TYPE_GRADIENT_GRADIENT) {
                 setArtBoardFill(oldGradient, oldGradientOrientation);
-            } else if (actionType == TYPE_COLOR_GRADIENT) {
+            }
+            else if (actionType == TYPE_COLOR_GRADIENT) {
                 fillTypeSpinner.setSelection(0);
                 setArtBoardFill(oldColor);
-            } else if (actionType == TYPE_GRADIENT_COLOR) {
+            }
+            else if (actionType == TYPE_GRADIENT_COLOR) {
                 fillTypeSpinner.setSelection(1);
                 setArtBoardFill(oldGradient, oldGradientOrientation);
             }
@@ -268,12 +273,15 @@ public class BackgroundColorFragment extends Fragment implements View.OnClickLis
         public void redo() {
             if (actionType == TYPE_COLOR_COLOR) {
                 setArtBoardFill(newColor);
-            } else if (actionType == TYPE_GRADIENT_GRADIENT) {
+            }
+            else if (actionType == TYPE_GRADIENT_GRADIENT) {
                 setArtBoardFill(newGradient, newGradientOrientation);
-            } else if (actionType == TYPE_COLOR_GRADIENT) {
+            }
+            else if (actionType == TYPE_COLOR_GRADIENT) {
                 fillTypeSpinner.setSelection(1);
                 setArtBoardFill(newGradient, newGradientOrientation);
-            } else if (actionType == TYPE_GRADIENT_COLOR) {
+            }
+            else if (actionType == TYPE_GRADIENT_COLOR) {
                 fillTypeSpinner.setSelection(0);
                 setArtBoardFill(newColor);
             }

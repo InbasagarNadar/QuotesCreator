@@ -1,7 +1,9 @@
 package com.dartt.yello;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -40,7 +42,6 @@ import java.util.Random;
 
 public class EditorFragment extends Fragment {
 
-    boolean init;
     CreateBackgroundActivity activity;
     FrameLayout frameArtBoard;
     EditorTouchListener touchListener;
@@ -49,19 +50,29 @@ public class EditorFragment extends Fragment {
     ArrayList<ViewContainer> viewContainers = new ArrayList<>();
 
     private FunctionParameter canvasLayoutChangeAction;
-    private final FunctionParameter onBackgroundChanged = new FunctionParameter() {
-        @Override
-        public void execute() {
-            activity.undo.afterEdit(backgroundViewContainer);
-        }
-    };
+    private final FunctionParameter onBackgroundChanged = () -> activity.undo.afterEdit(backgroundViewContainer);
+    private View alignmentGuideX;
+    private View alignmentGuideY;
+    public String draftKey;
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         View fragment = inflater.inflate(R.layout.fragment_editor, container, false);
         activity = (CreateBackgroundActivity) getActivity();
+        initViews(fragment);
+        initFrameArtBoard();
+        initViewTreeObserver(savedInstanceState);
+        return fragment;
+    }
+
+    void initViews(View fragment) {
         frameArtBoard = fragment.findViewById(R.id.frame_canvas);
+        alignmentGuideX = fragment.findViewById(R.id.alignment_guide_x);
+        alignmentGuideY = fragment.findViewById(R.id.alignment_guide_y);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    void initFrameArtBoard() {
         artBoardViewContainer = new ArtBoardViewContainer(frameArtBoard);
         backgroundViewContainer = new ImageViewContainer(this);
         frameArtBoard.addView(backgroundViewContainer.view);
@@ -71,74 +82,80 @@ public class EditorFragment extends Fragment {
                 return backgroundViewContainer;
             }
         });
-        View alignmentGuideX = fragment.findViewById(R.id.alignment_guide_x);
-        View alignmentGuideY = fragment.findViewById(R.id.alignment_guide_y);
-
         touchListener = new EditorTouchListener(frameArtBoard, alignmentGuideX, alignmentGuideY);
         frameArtBoard.setOnTouchListener(touchListener);
+    }
 
+    void initViewTreeObserver(final Bundle savedInstanceState) {
         final ViewTreeObserver viewTreeObserver = frameArtBoard.getViewTreeObserver();
         viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                //canvasFrameLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                if (canvasLayoutChangeAction != null) {
-                    canvasLayoutChangeAction.execute();
-                }
-                if (init) {
-                    return;
-                }
-                init = true;
+                frameArtBoard.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
-                if (savedInstanceState != null) {
-                    fromJSON(savedInstanceState.getString("json"));
-                    canvasLayoutChangeAction = new FunctionParameter() {
-                        @Override
-                        public void execute() {
-                            canvasLayoutChangeAction = null;
-                            touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
-                        }
-                    };
-                }
-                else {
-                    /* Checking if image exists in intent, else setting default image*/
+                if (savedInstanceState == null) {
                     Intent intent = activity.getIntent();
-                    String action = intent.getAction();
-                    String type = intent.getType();
-                    if (Intent.ACTION_SEND.equals(action) && type != null) {
-                        if (type.startsWith("image/")) {
-                            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                            if (imageUri != null) {
-                                backgroundViewContainer.setImage(imageUri, null, true);
-                            }
+                    if (intent.hasExtra("draft_key")) {
+                        draftKey = intent.getStringExtra("draft_key");
+                        SharedPreferences sharedPref = activity.getSharedPreferences("drafts", Context.MODE_PRIVATE);
+                        try {
+                            JSONObject draft = new JSONObject(sharedPref.getString(draftKey, "{}"));
+                            fromJSON(draft.getString("editable_json"));
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    }
-                    if (backgroundViewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL) {
-                        // Uncomment this to have default image on startup
-                        //backgroundViewContainer.setImage(Variables.BackgroundImages[0], null, true);
+
                     }
                     else {
-                        backgroundViewContainer.fillParent();
+                        draftKey = "draft_"+System.currentTimeMillis();
+                        loadImageFromIntent(activity.getIntent());
+                        initDefaultText();
                     }
-
-                    final TextViewContainer tv = new TextViewContainer(EditorFragment.this);
-                    tv.textContentOriginal = new SpannableStringBuilder(Variables.randomQuotes[new Random().nextInt(Variables.randomQuotes.length)]);
-                    tv.textContentOriginal.setSpan(new ForegroundColorSpan(0xFF000000), 0, tv.textContentOriginal.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                    tv.getView().setText(tv.textContentOriginal);
-                    addElement(tv);
-                    tv.setDimension(new Vector2D(frameArtBoard.getWidth(), frameArtBoard.getHeight()), false);
-                    tv.getView().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tv.setText(tv.getView());
-                        }
-                    });
+                }
+                else {
+                    draftKey = savedInstanceState.getString("draft_key");
+                    fromJSON(savedInstanceState.getString("json"));
+                    canvasLayoutChangeAction = () -> {
+                        canvasLayoutChangeAction = null;
+                        touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
+                    };
                 }
             }
-
         });
 
-        return fragment;
+        viewTreeObserver.addOnGlobalLayoutListener(this::onFrameArtBoardLayoutChangeEvent);
+    }
+
+    void onFrameArtBoardLayoutChangeEvent() {
+        if (canvasLayoutChangeAction != null) {
+            canvasLayoutChangeAction.execute();
+        }
+    }
+
+    boolean loadImageFromIntent(Intent intent) {
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if (type.startsWith("image/")) {
+                Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                if (imageUri != null) {
+                    backgroundViewContainer.setImage(imageUri, null, true);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void initDefaultText(){
+        final TextViewContainer tv = new TextViewContainer(EditorFragment.this);
+        tv.textContentOriginal = new SpannableStringBuilder(Variables.randomQuotes[new Random().nextInt(Variables.randomQuotes.length)]);
+        tv.textContentOriginal.setSpan(new ForegroundColorSpan(0xFF000000), 0, tv.textContentOriginal.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        tv.getView().setText(tv.textContentOriginal);
+        addElement(tv);
+        tv.setDimension(new Vector2D(frameArtBoard.getWidth(), frameArtBoard.getHeight()), false);
+        tv.getView().post(() -> tv.setText(tv.getView()));
     }
 
     Bitmap getBitmap() {
@@ -164,9 +181,9 @@ public class EditorFragment extends Fragment {
         artBoardViewContainer.setArtBoardFill(gradient, orientation);
     }
 
-    boolean isArtBoardVisible() {
+    boolean isArtBoardHidden() {
         if (backgroundViewContainer.currentBackgroundType == ImageViewContainer.BACKGROUND_TYPE_NULL) {
-            return true;
+            return false;
         }
         else {
             //Log.d("ArtBoard", artBoardViewContainer.width + " "+ artBoardViewContainer.height);
@@ -209,10 +226,10 @@ public class EditorFragment extends Fragment {
                 pointArea += Math.abs(frameCoordinate.x * (c.y - d.y) + c.x * (d.y - frameCoordinate.y) + d.x * (frameCoordinate.y - c.y)) / 2f;
                 pointArea += Math.abs(frameCoordinate.x * (d.y - a.y) + d.x * (a.y - frameCoordinate.y) + a.x * (frameCoordinate.y - d.y)) / 2f;
                 if (pointArea > rectArea + 5) {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return true;
             /*boolean leftSideVisible = layoutParams.leftMargin > 0;
             boolean rightSideVisible = (layoutParams.leftMargin + layoutParams.width) < artBoardViewContainer.view.getWidth();
             boolean topSideVisible = layoutParams.topMargin > 0;
@@ -247,12 +264,9 @@ public class EditorFragment extends Fragment {
 
     void setRatio(final String ratio) {
         final String oldRatio = artBoardViewContainer.getRatio();
-        artBoardViewContainer.setRatio(ratio, true, new FunctionParameter() {
-            @Override
-            public void execute() {
-                touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
-                activity.undo.addState(new RatioUndoable(oldRatio, ratio));
-            }
+        artBoardViewContainer.setRatio(ratio, true, () -> {
+            touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
+            activity.undo.addState(new RatioUndoable(oldRatio, ratio));
         });
     }
 
@@ -351,6 +365,7 @@ public class EditorFragment extends Fragment {
         try {
             String jsonString = toJSON().toString();
             outState.putString("json", jsonString);
+            outState.putString("draft_key", draftKey);
             Log.e("EditorFragment", "SaveInstanceState" + jsonString);
         } catch (Exception e) {
             Log.e("EditorFragment", "Failed to save state. JSON exception: " + e.toString());
@@ -377,22 +392,16 @@ public class EditorFragment extends Fragment {
 
         @Override
         public void undo() {
-            artBoardViewContainer.setRatio(oldDimensionRatio, true, new FunctionParameter() {
-                @Override
-                public void execute() {
-                    touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
-                }
-            });
+            artBoardViewContainer.setRatio(oldDimensionRatio,
+                    true,
+                    () -> touchListener.positionSnapper.resetMargins(frameArtBoard, 75));
         }
 
         @Override
         public void redo() {
-            artBoardViewContainer.setRatio(newDimensionRatio, true, new FunctionParameter() {
-                @Override
-                public void execute() {
-                    touchListener.positionSnapper.resetMargins(frameArtBoard, 75);
-                }
-            });
+            artBoardViewContainer.setRatio(newDimensionRatio,
+                    true,
+                    () -> touchListener.positionSnapper.resetMargins(frameArtBoard, 75));
         }
     }
 
@@ -428,12 +437,15 @@ public class EditorFragment extends Fragment {
         View xAlignmentGuide, yAlignmentGuide;
         PositionSnapper positionSnapper;
         RotationSnapper rotationSnapper;
+        ScaleAnimation animation;
 
         EditorTouchListener(ViewGroup canvas, View xAlignmentGuide, View yAlignmentGuide) {
             this.xAlignmentGuide = xAlignmentGuide;
             this.yAlignmentGuide = yAlignmentGuide;
             positionSnapper = new PositionSnapper(canvas, 75);
             rotationSnapper = new RotationSnapper();
+            animation = new ScaleAnimation(1.01f, 1, 1.01f, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            animation.setDuration(150);
         }
 
         @Override
@@ -448,12 +460,7 @@ public class EditorFragment extends Fragment {
             if (fingerCount == 1) {
                 if (activeViewContainer != null) {
                     activity.undo.beforeEdit(activeViewContainer);
-                    ScaleAnimation animation = new ScaleAnimation(1.01f, 1, 1.01f, 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                    animation.setDuration(150);
-                    //animation.setFillAfter(true);
                     activeViewContainer.view.startAnimation(animation);
-                    //activeViewContainer.view.setScaleX(.97f);
-                    //activeViewContainer.view.setScaleY(.97f);
                 }
             }
             else if (fingerCount == 2) {
@@ -491,9 +498,6 @@ public class EditorFragment extends Fragment {
                 if (activeViewContainer != null) {
                     activity.undo.afterEdit(activeViewContainer);
                     activeViewContainer = null;
-                /*activeViewContainer.view.setScaleX(1f);
-                activeViewContainer.view.setScaleY(1f);
-                */
                 }
                 positionSnapper.reset();
             }
@@ -506,10 +510,6 @@ public class EditorFragment extends Fragment {
 
         @Override
         void onDragStart(TouchData touchData) {
-            /*if (activeViewContainer != null) {
-                activeViewContainer.view.setScaleX(1f);
-                activeViewContainer.view.setScaleY(1f);
-            }*/
         }
 
         void setGuidePosition(Vector2D position) {
