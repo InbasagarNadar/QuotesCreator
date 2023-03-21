@@ -4,7 +4,6 @@ package com.dartt.yello;
 import static android.app.Activity.RESULT_OK;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +14,9 @@ import android.view.ViewOutlineProvider;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -33,6 +34,31 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
     CreateBackgroundActivity activity;
     ImageButton btnRemoveBackground;
     HorizontalScrollView horizontalScrollView;
+    ActivityResultLauncher<String> imagePermissionActivityResultLauncher;
+
+    @Override
+    public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        imagePermissionActivityResultLauncher = StorageHelper.registerImagePermissionResultLauncher(this, (permission, granted) -> {
+            if (granted) {
+                Toast.makeText(activity, "Granted", Toast.LENGTH_LONG).show();
+            }
+            else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setMessage("Please grant storage permission to import image from gallery");
+                builder.setPositiveButton("Okay", (dialog, id1) -> {
+                    if (shouldShowRequestPermissionRationale(permission)) {
+                        StorageHelper.requestImageReadPermission(imagePermissionActivityResultLauncher);
+                    }
+                    else {
+                        StorageHelper.openAppInfoSystemSetting(activity);
+                    }
+                });
+                builder.create().show();
+            }
+        });
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,7 +84,6 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             Glide.with(this).load(imageId).centerCrop().override(_40dp).into(new CustomTarget<Drawable>() {
                 @Override
                 public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-
                     button.setImageDrawable(resource);
                 }
 
@@ -95,6 +120,7 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             btnRemoveBackground.setVisibility(savedInstanceState.getInt("button_delete_visibility"));
         }
 
+
         return fragment;
     }
 
@@ -125,26 +151,17 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             // Intent intent = new Intent(activity, ServerImagesActivity.class);
             Intent intent = new Intent(activity, ImageSearchActivity.class);
             startActivityForResult(intent, INTERNET_IMAGE_REQUEST_CODE);
-        } else if (id == R.id.img_btn_gallery_background) {
-            if (StorageHelper.hasStoragePermission(activity)) {
+        }
+        else if (id == R.id.img_btn_gallery_background) {
+            if (StorageHelper.hasImageReadPermission(activity)) {
                 showGalleryImagePicker();
-            } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setMessage("Please grant storage permission to import image from gallery")
-                        .setPositiveButton("Okay", (dialog, id1) -> StorageHelper.requestStoragePermission(activity, 0));
-                AlertDialog alert = builder.create();
-                alert.show();
+            }
+            else {
+                StorageHelper.requestImageReadPermission(imagePermissionActivityResultLauncher);
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            showGalleryImagePicker();
-        }
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent resultIntent) {
@@ -153,7 +170,8 @@ public class BackgroundImageFragment extends Fragment implements View.OnClickLis
             if (requestCode == INTERNET_IMAGE_REQUEST_CODE) {
                 activity.setEditorBackground(resultIntent.getExtras().getString("image_url"));
                 btnRemoveBackground.setVisibility(View.VISIBLE);
-            } else if (requestCode == SELECT_BACKGROUND_IMAGE_REQUEST_CODE) {
+            }
+            else if (requestCode == SELECT_BACKGROUND_IMAGE_REQUEST_CODE) {
                 activity.setEditorBackground(resultIntent.getData());
                 btnRemoveBackground.setVisibility(View.VISIBLE);
             }

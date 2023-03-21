@@ -12,11 +12,11 @@
 
     <string-array name="format_entries">
         <item>Png</item>
-        <item>Jpg</item>
+        <item>Jpeg</item>
     </string-array>
     <string-array name="format_values">
         <item>png</item>
-        <item>jpg</item>
+        <item>jpeg</item>
     </string-array>
 
 

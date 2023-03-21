@@ -40,6 +40,7 @@ public class SplashScreenActivity extends AppCompatActivity {
             }
         }, 100);
 
+        getSharedPreferences("splash", MODE_PRIVATE).edit().putString("version", "1.27").apply();
         new Handler().postDelayed(() -> {
             Intent i = new Intent(SplashScreenActivity.this, TemplatesActivity.class);
             startActivity(i);

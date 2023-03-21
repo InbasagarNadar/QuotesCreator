@@ -3,4 +3,7 @@
     <external-path
         name="external"
         path="/DCIM/Yello/" />
+
+    <!--    <files-path path="/DCIM/Yello/" name="share" />-->
+
 </paths>

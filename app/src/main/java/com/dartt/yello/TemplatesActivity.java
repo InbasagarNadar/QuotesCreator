@@ -73,6 +73,7 @@ public class TemplatesActivity extends AppCompatActivity {
                 result -> adapter.refreshDataset()
         );
 
+        AdManager.preloadAds(this);
         boolean adsSettingExist = PreferenceManager.getDefaultSharedPreferences(this).contains("ad_enabled");
         if (!adsSettingExist) {
             showAdsConsentDialog();

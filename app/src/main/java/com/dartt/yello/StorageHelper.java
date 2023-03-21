@@ -1,7 +1,6 @@
 package com.dartt.yello;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,10 +15,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 
-import androidx.core.app.ActivityCompat;
+import androidx.activity.result.ActivityResultCaller;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
@@ -33,15 +35,99 @@ public class StorageHelper {
 
     public static final String IMAGES_FOLDER_NAME = "Yello";
 
-    static boolean hasStoragePermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+
+//    public static boolean getAskedPermission(Context context){
+//        SharedPreferences sharedPreferences = context.getSharedPreferences("permissions", MODE_PRIVATE);
+//        return sharedPreferences.getBoolean("asked_storage_permission", false);
+//    }
+//
+//    public static void setAskedPermission(Context context, boolean asked){
+//        SharedPreferences sharedPreferences = context.getSharedPreferences("permissions", MODE_PRIVATE);
+//        sharedPreferences.edit().putBoolean("asked_storage_permission", asked).apply();
+//    }
+
+    interface PermissionResultCallback {
+        void onResult(String permission, boolean granted);
+
     }
 
-    static void requestStoragePermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                requestCode);
+    public static boolean hasImageReadPermission(Context context) {
+        String permission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permission = Manifest.permission.READ_MEDIA_IMAGES;
+        }
+        else {
+            permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+        }
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
+
+
+    public static boolean hasWritePermission(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Toast.makeText(context, "HasPermission: true", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        else {
+            //Toast.makeText(context, "HasPermissionVer: " + hp, Toast.LENGTH_LONG).show();
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+
+    public static void requestImageReadPermission(ActivityResultLauncher<String> resultLauncher) {
+        String permission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permission = Manifest.permission.READ_MEDIA_IMAGES;
+        }
+        else {
+            permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+        }
+        resultLauncher.launch(permission);
+    }
+
+    public static void requestWritePermission(ActivityResultLauncher<String> resultLauncher) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Log.d("WritePermission", "Can't request permission on >=R");
+        }
+        else {
+            resultLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    public static ActivityResultLauncher<String> registerWritePermissionResultLauncher(ActivityResultCaller caller, PermissionResultCallback callback) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Log.d("WritePermission", "Can't request permission on >=R");
+            return null;
+        }
+        else {
+            return registerResultLauncher(caller, callback, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    public static ActivityResultLauncher<String> registerImagePermissionResultLauncher(ActivityResultCaller caller, PermissionResultCallback callback) {
+        String permission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permission = Manifest.permission.READ_MEDIA_IMAGES;
+        }
+        else {
+            permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+        }
+        return registerResultLauncher(caller, callback, permission);
+    }
+
+    private static ActivityResultLauncher<String> registerResultLauncher(ActivityResultCaller caller, PermissionResultCallback callback, String permission) {
+        return caller.registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> callback.onResult(permission, result));
+    }
+
+    public static void openAppInfoSystemSetting(Context context) {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+        intent.setData(uri);
+        context.startActivity(intent);
+    }
+
 
     static String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
@@ -85,7 +171,8 @@ public class StorageHelper {
             Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
             fos = resolver.openOutputStream(imageUri);
             path = StorageHelper.getRealPathFromURI(context, imageUri);
-        } else {
+        }
+        else {
             String imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString() + File.separator + IMAGES_FOLDER_NAME;
             File fileDirectory = new File(imagesDir);
             if (!fileDirectory.exists()) {
