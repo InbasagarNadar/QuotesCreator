@@ -1,5 +1,6 @@
 package com.dartt.yello;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,11 +10,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder> {
-
     int currentLanguageIndex;
     Context context;
     Lang[] activeLanguages;

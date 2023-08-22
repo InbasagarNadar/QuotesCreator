@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -278,6 +279,10 @@ class LanguageManager {
         final static String Gurmukhi = "gurmukhi";
         final static String Kannada = "kannada";
         final static String Gujarati = "gujarati";
+        final static String Arabic = "arabic";
+        final static String Burmese = "burmese";
+        final static String Odia = "odia";
+        final static String Thai = "thai";
     }
 
     public static final int[] englishFontResourceId = {
@@ -388,14 +393,18 @@ class LanguageManager {
                     return fonts;
                 }
             },
+            new Lang("Arabic", "عَرَبِيّ", Codes.Arabic),
             new Lang("Bengali", "বাংলা", Codes.Bengali),
+            new Lang("Burmese", "မြန်မာဘာသာ", Codes.Burmese),
             new Lang("Devanagari", "देवनागरी", Codes.Devanagari),
             new Lang("Gujarati", "ગુજરાતી", Codes.Gujarati),
             new Lang("Gurmukhi", "ਗੁਰਮੁਖੀ", Codes.Gurmukhi),
             new Lang("Kannada", "ಕನ್ನಡ", Codes.Kannada),
             new Lang("Malayalam", "മലയാളം", Codes.Malayalam),
+            new Lang("Odia", "ଓଡ଼ିଆ", Codes.Odia),
             new Lang("Tamil", "தமிழ்", Codes.Tamil),
             new Lang("Telugu", "తెలుగు", Codes.Telugu),
+            new Lang("Thai", "ไทย", Codes.Thai),
     };
 
     static boolean isLanguageDownloaded(Context context, String code) {
@@ -439,6 +448,24 @@ class LanguageManager {
         else if(characterLanguage == Character.UnicodeBlock.GUJARATI){
             languageCode = Codes.Gujarati;
         }
+        else if (characterLanguage == Character.UnicodeBlock.THAI){
+            languageCode = Codes.Thai;
+        }
+        else if (characterLanguage == Character.UnicodeBlock.ORIYA){
+            languageCode = Codes.Odia;
+        }
+        else if (characterLanguage == Character.UnicodeBlock.MYANMAR || characterLanguage == Character.UnicodeBlock.MYANMAR_EXTENDED_A){
+            languageCode = Codes.Burmese;
+        }
+        else if(characterLanguage == Character.UnicodeBlock.ARABIC || characterLanguage == Character.UnicodeBlock.ARABIC_SUPPLEMENT || characterLanguage == Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_A || characterLanguage == Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_B){
+            languageCode = Codes.Arabic;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if(characterLanguage == Character.UnicodeBlock.ARABIC_EXTENDED_A || characterLanguage == Character.UnicodeBlock.ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS){
+                languageCode = Codes.Arabic;
+            }
+        }
+
         return languageCode;
     }
 
