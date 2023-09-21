@@ -112,8 +112,6 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             Log.d("Analytics", "ads_enabled:" + String.valueOf(adsEnabled ? 1 : 0));
             if (adsEnabled) {
                 bannerAdView.setVisibility(View.VISIBLE);
-                MobileAds.initialize(this, initializationStatus -> {
-                });
                 AdRequest adRequest = new AdRequest.Builder().build();
                 bannerAdView.loadAd(adRequest);
                 //supportUsAd = createAndLoadRewardedAd(getString(R.string.ad_unit_support_us));

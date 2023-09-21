@@ -23,7 +23,7 @@ public class AdManager {
         void onSuccess();
     }
 
-    ;
+
 
     static final String TAG = "AdManager";
     static final HashMap<String, RewardedAd> rewardedAds = new HashMap<>();

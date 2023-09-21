@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -31,6 +32,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
 import com.dartt.yello.databinding.ActivityTemplatesBinding;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.ump.ConsentForm;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.FormError;
+import com.google.android.ump.UserMessagingPlatform;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,8 +49,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TemplatesActivity extends AppCompatActivity {
 
@@ -79,6 +89,167 @@ public class TemplatesActivity extends AppCompatActivity {
             showAdsConsentDialog();
         }
 
+        boolean shownChangelog = PreferenceManager.getDefaultSharedPreferences(this).getInt("version", 0) == BuildConfig.VERSION_CODE;
+        if (!shownChangelog) {
+            showChangeLog();
+        }
+        // something();
+        showConsentThing();
+        // ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        // Toast.makeText(this, "canshowads:" + canShowAds(this), Toast.LENGTH_LONG).show();
+    }
+
+
+    private final AtomicBoolean isMobileAdsInitializeCalled = new AtomicBoolean(false);
+    void showConsentThing() {
+        // Set tag for under age of consent. false means users are not under age of consent.
+        ConsentRequestParameters params = new ConsentRequestParameters
+                .Builder()
+                .setTagForUnderAgeOfConsent(false)
+                .build();
+
+        ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        consentInformation.requestConsentInfoUpdate(
+                this,
+                params,
+                (ConsentInformation.OnConsentInfoUpdateSuccessListener) () -> {
+                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                            this,
+                            (ConsentForm.OnConsentFormDismissedListener) loadAndShowError -> {
+                                if (loadAndShowError != null) {
+                                    // Consent gathering failed.
+                                    Log.w(TAG, String.format("%s: %s",
+                                            loadAndShowError.getErrorCode(),
+                                            loadAndShowError.getMessage()));
+                                }
+
+                                // Consent has been gathered.
+                                if (consentInformation.canRequestAds()) {
+                                    initializeMobileAdsSdk();
+                                }
+                            }
+                    );
+                },
+                (ConsentInformation.OnConsentInfoUpdateFailureListener) requestConsentError -> {
+                    // Consent gathering failed.
+                    Log.w(TAG, String.format("%s: %s",
+                            requestConsentError.getErrorCode(),
+                            requestConsentError.getMessage()));
+                });
+
+        // Check if you can initialize the Google Mobile Ads SDK in parallel
+        // while checking for new consent information. Consent obtained in
+        // the previous session can be used to request ads.
+        if (consentInformation.canRequestAds()) {
+            initializeMobileAdsSdk();
+        }
+    }
+    private void initializeMobileAdsSdk() {
+        if (isMobileAdsInitializeCalled.getAndSet(true)) {
+            return;
+        }
+
+        // Initialize the Google Mobile Ads SDK.
+        MobileAds.initialize(this);
+
+        // TODO: Request an ad.
+        // InterstitialAd.load(...);
+    }
+/*    void something(){
+        ConsentRequestParameters params = new ConsentRequestParameters.Builder().setTagForUnderAgeOfConsent(false).build();
+
+        ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        consentInformation.requestConsentInfoUpdate(this, params,
+            () -> UserMessagingPlatform.loadConsentForm(this,
+                consentForm -> consentForm.show(TemplatesActivity.this, formError -> {
+                    if(formError != null){
+                        Log.d(TAG, String.format("%s: %s", formError.getErrorCode(), formError.getMessage()));
+                    }
+                    else{
+                        if(!canShowAds(this)){
+                            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+                            builder1.setTitle("Please enable cookies.");
+                            builder1.setMessage("some text will come here");
+                            builder1.setPositiveButton("Okay", (dialogInterface, i) -> {
+                                something();
+                            });
+                            AlertDialog alert11 = builder1.create();
+                            alert11.show();
+                        }
+                    }
+                }),
+                formError -> Log.d(TAG, String.format("%s: %s", formError.getErrorCode(), formError.getMessage()))
+            ),
+            formError -> {
+                Log.d(TAG, String.format("%s: %s", formError.getErrorCode(), formError.getMessage()));
+            }
+        );
+    }
+
+    public boolean canShowAds(Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        String purposeConsent = prefs.getString("IABTCF_PurposeConsents", "");
+        String vendorConsent = prefs.getString("IABTCF_VendorConsents","");
+        String vendorLI = prefs.getString("IABTCF_VendorLegitimateInterests","");
+        String purposeLI = prefs.getString("IABTCF_PurposeLegitimateInterests","");
+
+        int googleId = 755;
+        boolean hasGoogleVendorConsent = hasAttribute(vendorConsent, googleId);
+        boolean hasGoogleVendorLI = hasAttribute(vendorLI, googleId);
+
+        List<Integer> indexes = new ArrayList<>();
+        indexes.add(1);
+
+        List<Integer> indexesLI = new ArrayList<>();
+        indexesLI.add(2);
+        indexesLI.add(7);
+        indexesLI.add(9);
+        indexesLI.add(10);
+
+        return hasConsentFor(indexes, purposeConsent, hasGoogleVendorConsent)
+                && hasConsentOrLegitimateInterestFor(indexesLI, purposeConsent, purposeLI, hasGoogleVendorConsent, hasGoogleVendorLI);
+
+    }
+    private boolean hasAttribute(String input, int index) {
+        if (input == null) return false;
+        return input.length() >= index && input.charAt(index-1) == '1';
+    }
+
+    private boolean hasConsentFor(List<Integer> indexes, String purposeConsent, boolean hasVendorConsent) {
+        for (Integer p: indexes) {
+            if (!hasAttribute(purposeConsent, p)) {
+                Log.e(TAG, "hasConsentFor: denied for purpose #" + p );
+                return false;
+            }
+        }
+        return hasVendorConsent;
+    }
+
+    private boolean hasConsentOrLegitimateInterestFor(List<Integer> indexes, String purposeConsent, String purposeLI, boolean hasVendorConsent, boolean hasVendorLI){
+        for (Integer p: indexes) {
+            boolean purposeAndVendorLI = hasAttribute(purposeLI, p) && hasVendorLI;
+            boolean purposeConsentAndVendorConsent = hasAttribute(purposeConsent, p) && hasVendorConsent;
+            boolean isOk = purposeAndVendorLI || purposeConsentAndVendorConsent;
+            if (!isOk){
+                Log.e(TAG, "hasConsentOrLegitimateInterestFor: denied for #" + p);
+                return false;
+            }
+        }
+        return true;
+    }
+
+ */
+
+
+    void showChangeLog() {
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setTitle("Changelog");
+        builder1.setMessage(getString(R.string.changelog));
+        builder1.setPositiveButton("Okay", (dialogInterface, i) -> {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("version", BuildConfig.VERSION_CODE).apply();
+        });
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 
     void showAdsConsentDialog() {
@@ -116,34 +287,26 @@ public class TemplatesActivity extends AppCompatActivity {
         int id = view.getId();
         if (id == R.id.button_navigation_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
-        }
-        else if (id == R.id.button_navigation_fonts) {
+        } else if (id == R.id.button_navigation_fonts) {
             startActivity(new Intent(this, ManageLanguageActivity.class));
-        }
-        else if (id == R.id.button_navigation_rate_app) {
+        } else if (id == R.id.button_navigation_rate_app) {
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + this.getPackageName())));
             } catch (ActivityNotFoundException e) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + this.getPackageName())));
             }
-        }
-        else if (id == R.id.button_navigation_contact_us) {
+        } else if (id == R.id.button_navigation_contact_us) {
             openMailApp();
-        }
-        else if (id == R.id.button_navigation_support_us) {
+        } else if (id == R.id.button_navigation_support_us) {
             // FirebaseAnalytics.getInstance(this).logEvent("support_us_clicked", );
             showSupportUsAdDialog();
-        }
-        else if (id == R.id.button_navigation_privacy_policy) {
+        } else if (id == R.id.button_navigation_privacy_policy) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://yelloquotes.com/privacy.html")));
-        }
-        else if (id == R.id.button_navigation_facebook) {
+        } else if (id == R.id.button_navigation_facebook) {
             showFacebookPage();
-        }
-        else if (id == R.id.button_navigation_get_featured || id == R.id.button_navigation_instagram) {
+        } else if (id == R.id.button_navigation_get_featured || id == R.id.button_navigation_instagram) {
             showInstagramPage();
-        }
-        else if (id == R.id.button_faq) {
+        } else if (id == R.id.button_faq) {
             startActivity(new Intent(this, FaqActivity.class));
         }
     }
@@ -155,8 +318,7 @@ public class TemplatesActivity extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hello Yello, ");
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(Intent.createChooser(intent, "Send Email"));
-        }
-        else {
+        } else {
             Toast.makeText(this, "Send an email to\nYello.DarttDevelopers@gmail.com\nto get in touch with us. ", Toast.LENGTH_SHORT).show();
         }
     }

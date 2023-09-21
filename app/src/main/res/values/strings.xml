@@ -23,5 +23,19 @@
     <string name="preference_format">Format</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="changelog">
+        v1.32
+            \n- Added Privacy Policy
+        \n
+        \nv1.31
+            \n- Added Thai (ไทย) fonts
+            \n- Added Odia (ଓଡ଼ିଆ) fonts
+            \n- Updated Devanagari (देवनागरी) fonts
+            \n- Updated Tamil (தமிழ்) fonts
+            \n- Updated Telugu (తెలుగు) fonts
+        \n
+        \nv1.30
+            \n- Added Arabic (عَرَبِيّ) fonts
+    </string>
 
 </resources>

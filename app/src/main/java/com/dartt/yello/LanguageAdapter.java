@@ -40,13 +40,13 @@ class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.LanguageViewH
             }
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                .setMessage("You haven't downloaded the language yet. Do you want to download it now?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        context.startActivity(new Intent(context, ManageLanguageActivity.class));
-                    }
-                })
-                .setNegativeButton("No", null);
+            .setMessage("You haven't downloaded the language yet. Do you want to download it now?")
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    context.startActivity(new Intent(context, ManageLanguageActivity.class));
+                }
+            })
+            .setNegativeButton("No", null);
         builder.show();
     }
 
