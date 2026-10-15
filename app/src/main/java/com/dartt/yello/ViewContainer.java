@@ -1,7 +1,9 @@
 package com.dartt.yello;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -253,13 +255,19 @@ class ImageViewContainer extends ViewContainer {
 
     @SuppressLint("ClickableViewAccessibility")
     ImageViewContainer(EditorFragment editorFragment) {
-        ImageView imageView = new ImageView(editorFragment.activity);
-        imageView.setOnTouchListener(new EditorFragment.ViewOnTouchListener(editorFragment) {
-            @Override
-            ViewContainer getViewContainer() {
-                return ImageViewContainer.this;
-            }
-        });
+        Context ctx = null;
+        if (editorFragment != null) {
+            ctx = editorFragment.activity != null ? editorFragment.activity : editorFragment.getContext();
+        }
+        ImageView imageView = ctx != null ? new ImageView(ctx) : null;
+        if (imageView != null && editorFragment != null) {
+            imageView.setOnTouchListener(new EditorFragment.ViewOnTouchListener(editorFragment) {
+                @Override
+                ViewContainer getViewContainer() {
+                    return ImageViewContainer.this;
+                }
+            });
+        }
         view = imageView;
     }
 
@@ -297,12 +305,19 @@ class ImageViewContainer extends ViewContainer {
     }
 
     void setDrawable(Drawable resource) {
-        //ImageView imageView = getView();
-        imageBitmap = ((BitmapDrawable) resource).getBitmap();
-        setBitmapWithFilter(imageBitmap);
-        //imageBitmapResized = SaveActivity.getResizedBitmap(imageBitmap, 512);
-        //imageView.setImageBitmap(imageBitmap);
-
+        if (resource instanceof BitmapDrawable) {
+            imageBitmap = ((BitmapDrawable) resource).getBitmap();
+        } else if (resource != null) {
+            int width = Math.max(resource.getIntrinsicWidth(), 1);
+            int height = Math.max(resource.getIntrinsicHeight(), 1);
+            imageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(imageBitmap);
+            resource.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            resource.draw(canvas);
+        }
+        if (imageBitmap != null) {
+            setBitmapWithFilter(imageBitmap);
+        }
     }
 
     void resetFilter() {
@@ -319,7 +334,9 @@ class ImageViewContainer extends ViewContainer {
     }
 
     void setBitmapWithFilter(Bitmap bitmap) {
-        getView().setImageBitmap(GraphicsHelper.changeBitmapContrastBrightnessSaturation(bitmap, contrast, brightness, saturation));
+        if (getView() != null) {
+            getView().setImageBitmap(GraphicsHelper.changeBitmapContrastBrightnessSaturation(bitmap, contrast, brightness, saturation));
+        }
     }
 
     void fillParent() {

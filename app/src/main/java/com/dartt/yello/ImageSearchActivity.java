@@ -115,7 +115,11 @@ public class ImageSearchActivity extends AppCompatActivity {
     }
 
     public void onRetryClick(View view) {
-        queryImages(searchHistory.get(searchHistory.size() - 1), false);
+        if (!searchHistory.isEmpty()) {
+            queryImages(searchHistory.get(searchHistory.size() - 1), false);
+        } else {
+            queryImages("Minimal Background", true);
+        }
     }
 
     void queryImages(String keyword, boolean addToHistory) {
@@ -123,7 +127,9 @@ public class ImageSearchActivity extends AppCompatActivity {
         if (addToHistory) {
             searchHistory.add(query);
         }
-        retryPanel.setVisibility(View.GONE);
+        if (retryPanel != null) {
+            retryPanel.setVisibility(View.GONE);
+        }
         /*if (cachedQueries.containsKey(query)) {
             recyclerViewImageGrid.setScrollX(0);
             imageAdapter.setData(cachedQueries.get(query));
@@ -132,7 +138,9 @@ public class ImageSearchActivity extends AppCompatActivity {
         if (activeRequest != null) {
             activeRequest.cancel();
         }
-        loadingPanel.setVisibility(View.VISIBLE);
+        if (loadingPanel != null) {
+            loadingPanel.setVisibility(View.VISIBLE);
+        }
         String url = "https://www.pixabay.com/api/?key=20611372-d4a4a10d99f6805c65245bf67&per_page=200&q=" + keyword;
         activeRequest = new StringRequest(
                 Request.Method.GET,
@@ -151,7 +159,9 @@ public class ImageSearchActivity extends AppCompatActivity {
                 }
                 , onErrorListener
         );
-        requestQueue.add(activeRequest);
+        if (requestQueue != null) {
+            requestQueue.add(activeRequest);
+        }
 
     }
 

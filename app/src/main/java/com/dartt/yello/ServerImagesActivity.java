@@ -103,11 +103,19 @@ public class ServerImagesActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (showingImagesPanel) {
-            request.cancel();
+            if (request != null) {
+                request.cancel();
+            }
             //imageRetryPanel.setVisibility(View.GONE);
-            imageRecyclerView.setVisibility(View.GONE);
-            categoryRecyclerView.setVisibility(View.VISIBLE);
-            loadingOverlay.setVisibility(View.GONE);
+            if (imageRecyclerView != null) {
+                imageRecyclerView.setVisibility(View.GONE);
+            }
+            if (categoryRecyclerView != null) {
+                categoryRecyclerView.setVisibility(View.VISIBLE);
+            }
+            if (loadingOverlay != null) {
+                loadingOverlay.setVisibility(View.GONE);
+            }
             showingImagesPanel = false;
         } else {
             setResult(RESULT_CANCELED);

@@ -8,7 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -363,10 +365,16 @@ public class CreateBackgroundActivity extends AppCompatActivity {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             saveDraft();
-            if (callBack != null) {
-                runOnUiThread(callBack::execute);
-            }
-            p.dismiss();
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    try {
+                        p.dismiss();
+                    } catch (Exception ignored) {}
+                }
+                if (callBack != null) {
+                    callBack.execute();
+                }
+            });
         });
     }
 
@@ -379,12 +387,25 @@ public class CreateBackgroundActivity extends AppCompatActivity {
             directory.mkdir();
             final String backgroundFileName = directory + "/background.png";
             if (editorFragment.backgroundViewContainer.currentBackgroundType != ImageViewContainer.BACKGROUND_TYPE_NULL) {
-                final BitmapDrawable background = (BitmapDrawable) editorFragment.backgroundViewContainer.getView().getDrawable();
+                Drawable drawable = editorFragment.backgroundViewContainer.getView().getDrawable();
+                Bitmap backgroundBitmap = null;
+                if (drawable instanceof BitmapDrawable) {
+                    backgroundBitmap = ((BitmapDrawable) drawable).getBitmap();
+                } else if (drawable != null) {
+                    int w = Math.max(drawable.getIntrinsicWidth(), 1);
+                    int h = Math.max(drawable.getIntrinsicHeight(), 1);
+                    backgroundBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(backgroundBitmap);
+                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    drawable.draw(canvas);
+                }
 
-                saveBitmapToLocation(background.getBitmap(), backgroundFileName);
-                //overwriting background type
-                editableJSON.getJSONObject("background").put("type", ImageViewContainer.BACKGROUND_TYPE_URL);
-                editableJSON.getJSONObject("background").put("background", backgroundFileName);
+                if (backgroundBitmap != null) {
+                    saveBitmapToLocation(backgroundBitmap, backgroundFileName);
+                    //overwriting background type
+                    editableJSON.getJSONObject("background").put("type", ImageViewContainer.BACKGROUND_TYPE_URL);
+                    editableJSON.getJSONObject("background").put("background", backgroundFileName);
+                }
             }
             else {
                 File backgroundImageFile = new File(backgroundFileName);
@@ -451,7 +472,11 @@ public class CreateBackgroundActivity extends AppCompatActivity {
     }
 
     private void saveBitmapToLocation(Bitmap bitmap, String location) throws FileNotFoundException {
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(location));
+        try (FileOutputStream out = new FileOutputStream(location)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
