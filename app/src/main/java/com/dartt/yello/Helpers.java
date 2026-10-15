@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -114,36 +115,53 @@ abstract class ZipExtractor implements Runnable {
 
         try {
             int fileCount = 0;
-            ZipEntry zipEntry;
-            ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
-            while (zipInputStream.getNextEntry() != null) {
-                fileCount++;
-                zipInputStream.closeEntry();
+            try (ZipFile zf = new ZipFile(zipFile)) {
+                fileCount = zf.size();
             }
             onGetFileCount(fileCount);
-            zipInputStream.close();
-            zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
-            new File(outputPath).mkdirs();
+
+            File outputDir = new File(outputPath);
+            outputDir.mkdirs();
+            String canonicalOutputDir = outputDir.getCanonicalPath();
 
             int i = 0;
             int readLength;
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4096];
             String[] fileNames = new String[fileCount];
 
-            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                fileNames[i] = zipEntry.getName();
-                //if (zipEntry.isDirectory()) {File fmd = new File(outputPath, fileNames[i]);fmd.mkdirs();continue;}
-                FileOutputStream zipOutputStream = new FileOutputStream(new File(outputPath, fileNames[i]));
-                while ((readLength = zipInputStream.read(buffer)) != -1) {
-                    zipOutputStream.write(buffer, 0, readLength);
+            try (ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)))) {
+                ZipEntry zipEntry;
+                while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+                    String entryName = zipEntry.getName();
+                    File targetFile = new File(outputDir, entryName);
+                    // Zip Slip protection
+                    String canonicalTarget = targetFile.getCanonicalPath();
+                    if (!canonicalTarget.startsWith(canonicalOutputDir + File.separator) &&
+                        !canonicalTarget.equals(canonicalOutputDir)) {
+                        throw new SecurityException("Zip entry is outside of target directory: " + entryName);
+                    }
+                    if (zipEntry.isDirectory()) {
+                        targetFile.mkdirs();
+                        zipInputStream.closeEntry();
+                        continue;
+                    }
+                    if (targetFile.getParentFile() != null) {
+                        targetFile.getParentFile().mkdirs();
+                    }
+                    if (i < fileNames.length) {
+                        fileNames[i] = entryName;
+                    }
+                    try (FileOutputStream zipOutputStream = new FileOutputStream(targetFile)) {
+                        while ((readLength = zipInputStream.read(buffer)) != -1) {
+                            zipOutputStream.write(buffer, 0, readLength);
+                        }
+                    }
+                    zipInputStream.closeEntry();
+                    onProgress(++i);
                 }
-                zipOutputStream.close();
-                zipInputStream.closeEntry();
-                onProgress(++i);
             }
-            zipInputStream.close();
             onExtractionComplete(fileNames, outputPath);
-        } catch (IOException e) {
+        } catch (Exception e) {
             onExtractionFailed(e);
         }
     }
@@ -181,9 +199,9 @@ abstract class Downloader implements Runnable {
 
     @Override
     public void run() {
-        InputStream httpInputStream;
-        FileOutputStream fileOutputStream;
-        HttpsURLConnection httpsURLConnection;
+        InputStream httpInputStream = null;
+        FileOutputStream fileOutputStream = null;
+        HttpsURLConnection httpsURLConnection = null;
         File cachedFile = new File(outputPath);
         try {
             final URL url = new URL(downloadUrl);
@@ -282,6 +300,22 @@ abstract class Downloader implements Runnable {
             String errorMessage = "Failed to download. Cache related code: " + e.getMessage();
             Log.e(LOG_TAG, errorMessage);
             onDownloadFailed(errorMessage);
+        } finally {
+            if (httpInputStream != null) {
+                try {
+                    httpInputStream.close();
+                } catch (Exception ignored) {}
+            }
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (Exception ignored) {}
+            }
+            if (httpsURLConnection != null) {
+                try {
+                    httpsURLConnection.disconnect();
+                } catch (Exception ignored) {}
+            }
         }
     }
 
@@ -454,6 +488,15 @@ abstract class Undo {
         }
     }
 
+    private static final int MAX_UNDO_STATES = 30;
+
+    private void trimStates() {
+        while (states.size() > MAX_UNDO_STATES && index > 0) {
+            states.remove(0);
+            index--;
+        }
+    }
+
     void afterEdit(ViewContainer viewContainer) {
         if (activeViewContainer == viewContainer) {
             try {
@@ -462,6 +505,7 @@ abstract class Undo {
                 if (!activeViewContainerOldState.toString().equals(newState.toString())) {
                     states.subList(++index, states.size()).clear();
                     states.add(new ViewContainerState(viewContainer, activeViewContainerOldState, newState));
+                    trimStates();
                 }
                 onUpdate();
             } catch (JSONException e) {
@@ -479,6 +523,7 @@ abstract class Undo {
         try {
             states.subList(++index, states.size()).clear();
             states.add(new ViewContainerState(viewContainer, null, viewContainer.toJSON()));
+            trimStates();
             onUpdate();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -489,6 +534,7 @@ abstract class Undo {
     void addState(Undoable state) {
         states.subList(++index, states.size()).clear();
         states.add(state);
+        trimStates();
         onUpdate();
     }
 

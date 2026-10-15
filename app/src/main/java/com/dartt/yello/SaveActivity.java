@@ -424,10 +424,17 @@ public class SaveActivity extends AppCompatActivity {
         // Check if filter is selected, then apply filter
         if (currentFilterIndex != 0) {
             // using copy so that it will work with alpha
-            Bitmap filterBitmap = filterPack.get(currentFilterIndex).processFilter(resultBitmap.copy(Bitmap.Config.ARGB_8888, true));
+            Bitmap copyForFilter = resultBitmap.copy(Bitmap.Config.ARGB_8888, true);
+            Bitmap filterBitmap = filterPack.get(currentFilterIndex).processFilter(copyForFilter);
             Paint alphaPaint = new Paint();
             alphaPaint.setAlpha((int) ((float) filterStrengths[currentFilterIndex] / (float) filterStrengthSeekBar.getMax() * 255));
             canvas.drawBitmap(filterBitmap, 0, 0, alphaPaint);
+            if (filterBitmap != null && filterBitmap != resultBitmap) {
+                filterBitmap.recycle();
+            }
+            if (copyForFilter != null && copyForFilter != resultBitmap && copyForFilter != filterBitmap) {
+                copyForFilter.recycle();
+            }
         }
 
         if (!watermarkRemoved) {
@@ -467,10 +474,11 @@ public class SaveActivity extends AppCompatActivity {
             fileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".FileProvider", new File(filePath));
         }
 
-        bitmap.compress(compressFormat, 100, outputStream);
-        if (outputStream != null) {
-            outputStream.flush();
-            outputStream.close();
+        try (OutputStream os = outputStream) {
+            if (os != null) {
+                bitmap.compress(compressFormat, 100, os);
+                os.flush();
+            }
         }
         MediaScannerConnection.scanFile(this, new String[]{filePath}, null, null);
         return fileUri;

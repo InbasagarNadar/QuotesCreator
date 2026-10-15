@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.radangames.quotescreator", appContext.getPackageName());
+        assertEquals("com.dartt.yello", appContext.getPackageName());
     }
 }

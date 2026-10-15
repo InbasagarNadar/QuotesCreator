@@ -40,7 +40,7 @@ public class AdManager {
     }
 
     public static void requestRewardedAd(Context context, String adUnit) {
-        if (hasAd(adUnit)) {
+        if (hasAd(adUnit) || context == null) {
             return;
         }
         try {
@@ -57,7 +57,8 @@ public class AdManager {
                     rewardedAds.put(adUnit, rewardedAd);
                 }
             };
-            RewardedAd.load(context, adUnit, adRequest, callback);
+            Context appContext = context.getApplicationContext();
+            RewardedAd.load(appContext != null ? appContext : context, adUnit, adRequest, callback);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
