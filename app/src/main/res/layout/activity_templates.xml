@@ -124,6 +124,7 @@
                         android:text="Contact Us" />
 
                     <Button
+                        android:visibility="gone"
                         android:id="@+id/button_navigation_support_us"
                         style="@style/NavigationBarButtonStyle"
                         android:drawableStart="@drawable/ic_support_us"

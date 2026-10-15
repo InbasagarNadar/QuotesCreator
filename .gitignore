@@ -11,3 +11,12 @@
 /build
 /captures
 .externalNativeBuild
+
+# Build and release artifacts
+*.apk
+*.aab
+/app/release/
+
+# IDE device selectors and user state
+/.idea/deploymentTargetDropDown.xml
+/.idea/deploymentTargetSelector.xml

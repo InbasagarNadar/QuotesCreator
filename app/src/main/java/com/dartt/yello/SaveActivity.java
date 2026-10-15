@@ -165,6 +165,7 @@ public class SaveActivity extends AppCompatActivity {
             if (adsEnabled) {
                 builder.setMessage("We'll now show a short ad. Please watch the full ad to remove watermark. This supports us monetarily, Thank you :D");
                 builder.setPositiveButton("Okay", (dialog, id) -> showWatermarkAd());
+                builder.setNegativeButton("No", (dialog, id) -> {});
             }
             else {
                 builder.setMessage("You've disabled ads, but it would be awesome if you watch this ad and support us monetarily. Would you like to watch an ad?");
