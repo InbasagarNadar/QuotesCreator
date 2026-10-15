@@ -10,9 +10,12 @@ import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class AdManager {
@@ -26,14 +29,22 @@ public class AdManager {
 
 
     static final String TAG = "AdManager";
+    public static final String TEST_DEVICE_ID = "CA65B52D8177D28B249A5F017E0EC63F";
     static final HashMap<String, RewardedAd> rewardedAds = new HashMap<>();
 
+    public static void configureTestDevices() {
+        RequestConfiguration configuration = new RequestConfiguration.Builder()
+                .setTestDeviceIds(Arrays.asList(AdRequest.DEVICE_ID_EMULATOR, TEST_DEVICE_ID))
+                .build();
+        MobileAds.setRequestConfiguration(configuration);
+    }
 
     public static void requestRewardedAd(Context context, String adUnit) {
         if (hasAd(adUnit)) {
             return;
         }
         try {
+            configureTestDevices();
             AdRequest adRequest = new AdRequest.Builder().build();
             RewardedAdLoadCallback callback = new RewardedAdLoadCallback() {
                 @Override

@@ -71,6 +71,10 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 */
                 int pointerId0 = motionEvent.getPointerId(0);
                 TouchData touchData0 = activeTouches.get(pointerId0);
+                if (touchData0 == null) {
+                    touchData0 = new TouchData(pointerId0, new Vector2D(view, motionEvent, 0));
+                    activeTouches.put(pointerId0, touchData0);
+                }
                 touchData0.setCurrentPosition(new Vector2D(view, motionEvent, 0));
                 dragThreshold += Math.abs(touchData0.getDeltaPosition().x) + Math.abs(touchData0.getDeltaPosition().y);
                 if (dragThreshold > minDrag) {
@@ -87,6 +91,10 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                         case 2:
                             int pointerId1 = motionEvent.getPointerId(1);
                             TouchData touchData1 = activeTouches.get(pointerId1);
+                            if (touchData1 == null) {
+                                touchData1 = new TouchData(pointerId1, new Vector2D(view, motionEvent, 1));
+                                activeTouches.put(pointerId1, touchData1);
+                            }
                             touchData1.setCurrentPosition(new Vector2D(view, motionEvent, 1));
                             onTwoFingerDrag(new PinchData(touchData0, touchData1));
                             break;
@@ -96,12 +104,16 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_CANCEL:
+                TouchData upTouchData = activeTouches.get(currentPointerId);
+                if (upTouchData == null) {
+                    upTouchData = new TouchData(currentPointerId, new Vector2D(view, motionEvent, currentPointerIndex));
+                }
                 if (pointerCount == 1) {
                     if (click) {
-                        onClick(activeTouches.get(currentPointerId));
+                        onClick(upTouchData);
                     }
                 }
-                onFingerUp(pointerCount, activeTouches.get(currentPointerId), click);
+                onFingerUp(pointerCount, upTouchData, click);
                 activeTouches.remove(currentPointerId);
                 break;
         }

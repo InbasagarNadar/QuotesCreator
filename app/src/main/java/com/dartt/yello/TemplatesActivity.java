@@ -33,6 +33,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
 import com.dartt.yello.databinding.ActivityTemplatesBinding;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.ump.ConsentDebugSettings;
 import com.google.android.ump.ConsentForm;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
@@ -102,9 +103,14 @@ public class TemplatesActivity extends AppCompatActivity {
 
     private final AtomicBoolean isMobileAdsInitializeCalled = new AtomicBoolean(false);
     void showConsentThing() {
+        ConsentDebugSettings debugSettings = new ConsentDebugSettings.Builder(this)
+                .addTestDeviceHashedId(AdManager.TEST_DEVICE_ID)
+                .build();
+
         // Set tag for under age of consent. false means users are not under age of consent.
         ConsentRequestParameters params = new ConsentRequestParameters
                 .Builder()
+                .setConsentDebugSettings(debugSettings)
                 .setTagForUnderAgeOfConsent(false)
                 .build();
 
@@ -148,6 +154,9 @@ public class TemplatesActivity extends AppCompatActivity {
         if (isMobileAdsInitializeCalled.getAndSet(true)) {
             return;
         }
+
+        // Configure test devices
+        AdManager.configureTestDevices();
 
         // Initialize the Google Mobile Ads SDK.
         MobileAds.initialize(this);
